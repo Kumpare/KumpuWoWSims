@@ -244,6 +244,23 @@ class VoidSummoner(DiscTalentWrapper):
     def after_cast(self):
         pass
 
+class Amirdrassil_2p(DiscTalentWrapper):
+
+    def __init__(self, disc: Discipline):
+        super().__init__(name='Amirdrassil_2p', disc=disc, n_points=1)
+        self._extend_amount = 2
+        self._smite = disc.abilities['smite']
+        self._smite_4p = disc.abilities['smite_4p']
+
+        self._smite.cast = self._decorator_after(self._smite.cast)
+        self._smite_4p.cast = self._decorator_after(self._smite_4p.cast)
+
+    def before_cast(self):
+        pass
+
+    def after_cast(self):
+        self.disc.active_atonements.extend_random(self._extend_amount)
+
 class Amirdrassil_4p(DiscTalentWrapper):
 
     def __init__(self, disc: Discipline):

@@ -204,6 +204,7 @@ class Discipline(Specialization):
             sc = DiscTalents.ShadowCovenant(self)
             self._buffs["SC"] = sc
 
+        DiscTalents.Amirdrassil_2p(self)
         DiscTalents.Amirdrassil_4p(self)
 
         if self.talents["VS"] > 0:
@@ -427,4 +428,12 @@ class AtonementHandler:
     def n_atonements(self):
         return (self.active_atonements > 0).astype('uint8').sum()
 
-
+    def extend_random(self, t_amount: float):
+        n_atonements = self.n_atonements
+        if n_atonements == 0:
+            return
+        r_int = np.random.randint(0, high=self.active_atonements.shape[0])
+        r_int = r_int % n_atonements
+        indices = np.nonzero(self.target_has_atonement)[0]
+        self.active_atonements[indices[r_int]] += t_amount
+        pass
