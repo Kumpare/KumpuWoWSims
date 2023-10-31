@@ -179,7 +179,6 @@ class Discipline(Specialization):
 
             self.abilities[ability.name] = ability
 
-        DiscTalents.Amirdrassil_4p(self)
 
         if self.talents["BT"] > 0:
             DiscTalents.BorrowedTime(self, pws, self.talents["BT"])
@@ -205,6 +204,8 @@ class Discipline(Specialization):
         if self.talents["SC"] > 0:
             sc = DiscTalents.ShadowCovenant(self)
             self._buffs["SC"] = sc
+
+        DiscTalents.Amirdrassil_4p(self)
 
         if self.talents["VS"] > 0:
             DiscTalents.VoidSummoner(self)
@@ -249,11 +250,11 @@ class Discipline(Specialization):
         to_return = []
         ability_to_cast = self.abilities[ability_name]
 
-        if ability_to_cast.remaining_cooldown > 0:
+        if ability_to_cast.remaining_cooldown > 0 and ability_to_cast._charges == 0:
             self.progress_time(ability_to_cast.remaining_cooldown)
 
         cast_time = ability_to_cast.cast_time
-        looped_events = self.loop_through_events_until(cast_time)
+        looped_events = self.loop_through_events_until(self.time + cast_time)
         to_return.extend(looped_events)
 
         next_event = ability_to_cast.cast(self.time)
@@ -322,10 +323,10 @@ class Discipline(Specialization):
                 self.refresh_buff(buff_id)
                 return buff_id
         ability.apply(self.time + ability.cast_time)
-        self.active_buffs.loc[self._next_buff_id, ['Expiration time', 'ID']] = ability.remaining_duration + ability.cast_time, self._next_buff_id
+        self.active_buffs.loc[self._next_buff_id, ['Expiration time', 'ID']] = self.time + ability.remaining_duration + ability.cast_time, self._next_buff_id
 
         if isinstance(ability, TickingBuff):
-            self.active_buffs.loc[self._next_buff_id, ['Next tick']] = self.time
+            self.active_buffs.loc[self._next_buff_id, ['Next tick']] = self.time + ability._tick_rate
 
         self._active_buffs[self._next_buff_id] = ability
         self._next_buff_id += 1
@@ -344,14 +345,14 @@ class Discipline(Specialization):
 
         buff_id = self.find_buff_id(buff)
         buff.extend_duration(amount=t_amount)
-        self.active_buffs.loc[[self.active_buffs['ID'] == buff_id], 'Expiration time'] += t_amount
+        self.active_buffs.loc[self.active_buffs['ID'] == buff_id, 'Expiration time'] += t_amount
         pass
 
     def consume_buff(self, buff_id: int=None, buff: Buff=None):
         assert not (buff_id is None and buff is None)
 
         if buff_id is not None:
-            active_buff = self._active_buffs[buff_id].pop()
+            active_buff = self._active_buffs.pop(buff_id)
             active_buff.expire()
             self.active_buffs.drop((self.active_buffs['ID'] == buff_id).index, inplace=True)
             return

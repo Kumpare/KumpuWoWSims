@@ -192,7 +192,7 @@ class ShadowCovenant(DiscTalentWrapper):
 
     def __init__(self, disc:Discipline):
         bender_chosen = disc.talents['Bender'] > 0
-        ability = disc.abilities['bender'] if bender_chosen else disc.abilities['Sfiend']
+        ability = disc.abilities['bender'] if bender_chosen else disc.abilities['sfiend']
         super().__init__(name='SC', disc=disc, n_points=1, ability=ability, gcd=0, buff_duration= 12 + 3*int(not bender_chosen))
 
         self.throughput_type = ThroughputType.SHADOW
@@ -248,19 +248,22 @@ class Amirdrassil_4p(DiscTalentWrapper):
 
     def __init__(self, disc: Discipline):
         super().__init__(name='Amirdrassil_4p', disc=disc, n_points=1, ability=disc.abilities['smite'])
+        self._scov = disc._buffs["SC"]
 
     def before_cast(self):
         pass
 
     def after_cast(self):
-        self.disc.cast("smite_4p")
+        if self._scov.buff_active:
+            print(f'Casting amirdrassil 4p')
+            self.disc.cast("smite_4p")
 
 class InescepableTorment(DiscTalentWrapper):
 
     def __init__(self, disc: Discipline):
         super().__init__("IT", disc=disc, n_points=1)
 
-        self._bender_talented = disc.talents['bender'] > 0
+        self._bender_talented = disc.talents['Bender'] > 0
         self._pet = disc.abilities['bender'] if self._bender_talented else disc.abilities['sfiend']
         self._pet_name = "bender" if self._bender_talented else "sfiend"
         self._scov = self.disc._buffs["SC"]
@@ -280,14 +283,16 @@ class InescepableTorment(DiscTalentWrapper):
             ability.cast = self._decorator_after(ability.cast)
 
     def before_cast(self):
-        self.disc.cast('IT')
-        self.disc.extend_buff(self._scov, self._scov_extension_amount)
-        self.disc.extend_buff(self._pet, self._pet_extension_amount)
+        if self._pet.buff_active:
+            self.disc.cast('IT')
+            self.disc.extend_buff(self._scov, self._scov_extension_amount)
+            self.disc.extend_buff(self._pet, self._pet_extension_amount)
 
     def after_cast(self):
-        self.disc.cast('IT')
-        self.disc.extend_buff(self._scov,self._scov_extension_amount)
-        self.disc.extend_buff(self._pet, self._pet_extension_amount)
+        if self._pet.buff_active:
+            self.disc.cast('IT')
+            self.disc.extend_buff(self._scov, self._scov_extension_amount)
+            self.disc.extend_buff(self._pet, self._pet_extension_amount)
 
 class HarshDiscipline(DiscTalentWrapper):
 

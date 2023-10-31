@@ -27,6 +27,7 @@ class DiscAbility(Ability):
 
     def ability_event(self, cast_start_time: float):
         to_return = DiscAbilityEvent(dmg=self.dmg_sp_coef, heal=self.heal_sp_coef, timestamp=cast_start_time + self.cast_time,
+                                     ability_name=self.name,
                                      procs_atonement=self.procs_atonement, throughput_type=self.throughput_type)
         return to_return
 
@@ -62,15 +63,16 @@ class DiscTickingBuff(TickingBuff):
         assert procs_atonement == (self.dmg_sp_coef > 0)
 
     def ability_event(self, cast_start_time: float):
-        to_return = DiscAbilityEvent(dmg=self._tick_sp_coef, heal=0, timestamp=cast_start_time, procs_atonement=self.procs_atonement,
+        to_return = DiscAbilityEvent(dmg=self._tick_sp_coef, heal=0, timestamp=cast_start_time,
+                                     ability_name=self.name, procs_atonement=self.procs_atonement,
                                      throughput_type=self.throughput_type)
         return to_return
 
 
 class DiscAbilityEvent(AbilityEvent):
 
-    def __init__(self, dmg: float, heal: float, timestamp: float, throughput_type: ThroughputType, procs_atonement: bool = True):
-        super().__init__(dmg=dmg, heal=heal, timestamp=timestamp, throughput_type=throughput_type)
+    def __init__(self, dmg: float, heal: float, timestamp: float, ability_name:str, throughput_type: ThroughputType, procs_atonement: bool = True):
+        super().__init__(dmg=dmg, heal=heal, timestamp=timestamp, ability_name=ability_name, throughput_type=throughput_type)
         self.procs_atonement = procs_atonement
 
 
@@ -107,5 +109,5 @@ class Penance(DiscAbility):
 
     def ability_event(self, cast_start_time: float):
         to_return = DiscAbilityEvent(dmg=self.dmg_sp_coef*self.n_bolts, heal=self.heal_sp_coef*self.n_bolts, timestamp=cast_start_time + self.cast_time,
-                                     procs_atonement=self.procs_atonement, throughput_type=self.throughput_type)
+                                     ability_name=self.name, procs_atonement=self.procs_atonement, throughput_type=self.throughput_type)
         return to_return

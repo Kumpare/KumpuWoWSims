@@ -182,8 +182,9 @@ class TickingBuff(Buff):
 
 class AbilityEvent:
 
-    def __init__(self, dmg: float, heal: float, timestamp: float, throughput_type: ThroughputType):
+    def __init__(self, dmg: float, heal: float, timestamp: float, ability_name:str, throughput_type: ThroughputType):
         self.dmg = dmg
         self.heal = heal
         self.timestamp = timestamp
         self.throughput_type = throughput_type
+        self.ability_name = ability_name
