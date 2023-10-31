@@ -1,6 +1,7 @@
 from Discipline.Disc import DiscAbility, DiscTickingBuff, Discipline
 from General.ThroughputTracker import ThroughputTracker
 from General.Stats import Stats
+from Plotting.ThroughputPlotting import plot_throughputs
 
 def DiscSim_test(disc: Discipline):
 
@@ -21,6 +22,7 @@ def DiscSim_test(disc: Discipline):
     disc.cast("smite")
 
     result = disc.data
+    plot_throughputs([disc])
     print(result)
 
 talents1 = {
