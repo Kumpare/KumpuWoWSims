@@ -39,7 +39,7 @@ def plot_throughputs(throughputs: Collection[ThroughputTracker], metric_to_track
     plt.clf()
 
 
-def smoothen_data(data: pd.Series, ticks: float = 1, radius: float = 1) -> pd.Series:
+def smoothen_data(data: pd.Series, ticks: float = 1, radius: float = 1.5) -> pd.Series:
     last_idx = (int(data.index.max() / ticks) + 1) * ticks
 
     idxs = np.arange(0, last_idx, ticks)
@@ -47,6 +47,6 @@ def smoothen_data(data: pd.Series, ticks: float = 1, radius: float = 1) -> pd.Se
     to_return = pd.Series(index=idxs)
     for idx in idxs:
         sub_data = data.loc[np.abs(data.index - idx) <= radius]
-        mean = sub_data.mean()
+        mean = sub_data.sum()/(2*radius)
         to_return[idx] = mean
     return to_return

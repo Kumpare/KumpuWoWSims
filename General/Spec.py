@@ -8,7 +8,7 @@ class Specialization:
         self.stats = stats
         self.stat_increases = {
             'main': 1,
-            'haste': 1,
+            'haste': 1.01,
             'crit': 1,
             'vers': 1,
             'mast': 1,

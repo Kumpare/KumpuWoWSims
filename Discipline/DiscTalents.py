@@ -255,10 +255,9 @@ class Amirdrassil_4p(DiscTalentWrapper):
 
     def after_cast(self):
         if self._scov.buff_active:
-            print(f'Casting amirdrassil 4p')
             self.disc.cast("smite_4p")
 
-class InescepableTorment(DiscTalentWrapper):
+class InescapableTorment(DiscTalentWrapper):
 
     def __init__(self, disc: Discipline):
         super().__init__("IT", disc=disc, n_points=1)

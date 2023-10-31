@@ -148,30 +148,29 @@ class Discipline(Specialization):
                           atonement_duration=Discipline._BASE_RADIANCE_ATONEMENT_DURATION_MODIFIER*15)
 
         # Renew
-        renew = DiscAbility('renew', haste_effect=h, heal_sp_coef=1.6)
+        renew = DiscAbility('renew', haste_effect=h, heal_sp_coef=2.37*h)
 
         # Flash heal todo: self atonement proc
-        flash_heal = DiscAbility('flash_heal', cast_time=1.5, haste_effect=h, heal_sp_coef=2.842*1.15*1.2, n_atonements_applied=1)
+        flash_heal = DiscAbility('flash_heal', cast_time=1.5, haste_effect=h, heal_sp_coef=4.77*1.2, n_atonements_applied=1)
 
         # Penance
-        penance_heal = Penance(haste_effect=h, heal_sp_coef=1.9)
-        penance = Penance(haste_effect=h, dmg_sp_coef=0.53, procs_atonement=True)
+        penance_heal = Penance(haste_effect=h, heal_sp_coef=1.287*1.5)
+        penance = Penance(haste_effect=h, dmg_sp_coef=0.414*1.15*1.32/1.09, procs_atonement=True)
 
         # Smite
-        smite = DiscAbility('smite', cast_time=GCD, haste_effect=h, dmg_sp_coef=0.705, procs_atonement=True, throughput_type=ThroughputType.LIGHT)
-        smite_4p = DiscAbility('smite_4p', cast_time=0, gcd=0, dmg_sp_coef=0.705, procs_atonement=True, throughput_type=ThroughputType.SHADOW)
+        smite = DiscAbility('smite', cast_time=GCD, haste_effect=h, dmg_sp_coef=0.55*1.15/1.09, procs_atonement=True, throughput_type=ThroughputType.LIGHT)
+        smite_4p = DiscAbility('smite_4p', cast_time=0, gcd=0, dmg_sp_coef=0.55*1.15/1.09, procs_atonement=True, throughput_type=ThroughputType.SHADOW)
 
         mind_blast = DiscAbility('mind_blast', cast_time=GCD, haste_effect=h, cooldown=24, cooldown_haste_scale=True,
-                                 dmg_sp_coef=0.78336, procs_atonement=True)
+                                 dmg_sp_coef=1.14/1.09*1.3, procs_atonement=True, throughput_type=ThroughputType.SHADOW)
+
+        swd = DiscAbility('swd', dmg_sp_coef=1.238/1.09, cooldown=12, procs_atonement=True, throughput_type=ThroughputType.SHADOW)
+        swd_execute = SWD_Execute()
 
         #todo sp coefs
-        swd = DiscAbility('swd', dmg_sp_coef=1, cooldown=12, procs_atonement=True)
-        swd_execute = DiscAbility('swd_execute', dmg_sp_coef=1, cooldown=12, charges=2, procs_atonement=True)
-
-        #todo sp coefs
-        bender = DiscTickingBuff('bender', cooldown=60, haste_effect=h, buff_duration=12, sp_coef=1, procs_atonement=True)
-        sfiend = DiscTickingBuff('sfiend', cooldown=180, haste_effect=h, buff_duration=15, sp_coef=1, procs_atonement=True)
-        ptw = DiscTickingBuff('ptw', haste_effect=h, buff_duration=24, sp_coef=1, procs_atonement=True) #todo own class for these
+        bender = DiscTickingBuff('bender', cooldown=60, haste_effect=h, buff_duration=12, sp_coef=3.74/1.09, procs_atonement=True)
+        sfiend = DiscTickingBuff('sfiend', cooldown=180, haste_effect=h, buff_duration=15, sp_coef=5.24/1.09, procs_atonement=True)
+        ptw = DiscTickingBuff('ptw', haste_effect=h, buff_duration=20, sp_coef=1.69/1.09*1.05, tick_rate=2, procs_atonement=True)
 
         self.abilities = {}
         for ability in [pws, pws_rapture, pwr, renew, flash_heal, penance_heal, penance, smite, mind_blast,
@@ -213,12 +212,10 @@ class Discipline(Specialization):
 
         it = None
         if self.talents["IT"] > 0:
-            it = DiscAbility("IT", gcd=0, dmg_sp_coef=1, throughput_type=ThroughputType.SHADOW, procs_atonement=True) #todo dmg_sp_coef
+            it = DiscAbility("IT", gcd=0, dmg_sp_coef=1.65/1.09, throughput_type=ThroughputType.SHADOW, procs_atonement=True)
             self.abilities["IT"] = it
-            DiscTalents.InescepableTorment(self)
-            DiscTalents.InescepableTorment(self)
-            DiscTalents.InescepableTorment(self)
-            DiscTalents.InescepableTorment(self)
+            DiscTalents.InescapableTorment(self)
+
 
         if self.talents["BoL"] > 0:
             penance.dmg_sp_coef *= (1.08 if self.talents["BoL"] == 1 else 1.15)
@@ -226,7 +223,7 @@ class Discipline(Specialization):
             smite_4p.dmg_sp_coef *= (1.08 if self.talents["BoL"] == 1 else 1.15)
 
         if self.talents["HD"] > 0:
-            DiscTalents.HarshDiscipline(self) #todo kaikki muutkin vain disc sisään
+            DiscTalents.HarshDiscipline(self)
 
         if self.talents["Castigation"] > 0:
             self.abilities['penance'].n_bolts += 1
@@ -268,6 +265,8 @@ class Discipline(Specialization):
             if ability_to_cast.n_atonements_applied > 0:
                 self.active_atonements.add_atonement(ability_to_cast.n_atonements_applied,
                                                      duration=ability_to_cast.atonement_duration + ability_to_cast.cast_time)
+                if ability_name == "flash_heal":
+                    self.active_atonements.add_atonement(1, duration=ability_to_cast.atonement_duration + ability_to_cast.cast_time, player_ind=19)
 
         looped_events2 = self.loop_through_events_until(self.time + ability_to_cast.time_taken)
         to_return.extend(looped_events2)
@@ -309,7 +308,9 @@ class Discipline(Specialization):
         if ability_event.procs_atonement and ability_event.dmg > 0:
             mastery_effect = 1 + self.stat_to_percent("mast")
             n_atonements = self.active_atonements.n_atonements
+            ab_effect = 1 + 0.1*self.talents['AR']
             atonement_heal = ability_event.dmg*Discipline._BASE_ATONEMENT_TRANSFER*n_atonements*self.get_sins_multiplier(n_atonements)
+            atonement_heal *= ab_effect if ability_event.throughput_type == ThroughputType.SHADOW else 1
             atonement_heal *= crit_effect*vers_effect*mastery_effect
             ability_event.heal += atonement_heal
 

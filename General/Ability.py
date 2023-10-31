@@ -69,11 +69,6 @@ class Ability:
     def ability_event(self, cast_start_time: float):
         NotImplementedError()
 
-class AbilityWrapper:
-
-    def __init__(self, ability: Ability):
-        self.ability = ability
-
 class Buff(Ability):
 
     def __init__(self, name:str, cast_time: float = 0., gcd: float = 0,

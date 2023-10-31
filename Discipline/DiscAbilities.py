@@ -79,7 +79,7 @@ class DiscAbilityEvent(AbilityEvent):
 class SWD_Execute(DiscAbility):
 
     def __init__(self):
-        super().__init__('swd_execute', dmg_sp_coef=1, cooldown=12, charges=2, procs_atonement=True)
+        super().__init__('swd_execute', dmg_sp_coef=1.238*2.5/1.09, cooldown=12, charges=2, procs_atonement=True, throughput_type=ThroughputType.SHADOW)
 
     def base_cast(self, cast_start_time: float):
         if self.remaining_cooldown > 0 and self._charges == 0:
