@@ -90,7 +90,7 @@ class Discipline(Specialization):
         self.pws_atonement_duration = 17 if self.talents['Indemnity'] > 0 else 15
 
         self._init_abilities()
-
+        self._ab_effect = 1 + 0.1*talents["AR"]
         self.active_buffs = pd.DataFrame(columns=['Next tick', 'Expiration time', 'ID'])
         self._active_buffs = dict()
         self._next_buff_id = 0
@@ -172,9 +172,10 @@ class Discipline(Specialization):
         sfiend = DiscTickingBuff('sfiend', cooldown=180, haste_effect=h, buff_duration=15, sp_coef=5.24/1.09, procs_atonement=True)
         ptw = DiscTickingBuff('ptw', haste_effect=h, buff_duration=20, sp_coef=1.69/1.09*1.05, tick_rate=2, procs_atonement=True)
 
+        halo = DiscAbility('halo', cooldown=45, haste_effect=h, dmg_sp_coef=1, heal_sp_coef=1, procs_atonement=True, throughput_type=ThroughputType.LIGHT)
         self.abilities = {}
         for ability in [pws, pws_rapture, pwr, renew, flash_heal, penance_heal, penance, smite, mind_blast,
-                        swd, swd_execute, bender, sfiend, ptw, smite_4p]:
+                        swd, swd_execute, bender, sfiend, ptw, smite_4p, halo]:
 
             self.abilities[ability.name] = ability
 
@@ -309,7 +310,7 @@ class Discipline(Specialization):
         if ability_event.procs_atonement and ability_event.dmg > 0:
             mastery_effect = 1 + self.stat_to_percent("mast")
             n_atonements = self.active_atonements.n_atonements
-            ab_effect = 1 + 0.1*self.talents['AR']
+            ab_effect = self._ab_effect
             atonement_heal = ability_event.dmg*Discipline._BASE_ATONEMENT_TRANSFER*n_atonements*self.get_sins_multiplier(n_atonements)
             atonement_heal *= ab_effect if ability_event.throughput_type == ThroughputType.SHADOW else 1
             atonement_heal *= crit_effect*vers_effect*mastery_effect

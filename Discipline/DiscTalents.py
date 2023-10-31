@@ -335,5 +335,14 @@ class HarshDiscipline(DiscTalentWrapper):
         self._penance.n_bolts -= self.n_points*self._stacks
         self._penance.n_bolts -= self.n_points*self._stacks
 
+class WordsOfThePious(DiscTalentWrapper):
 
+    def __init__(self, disc: Discipline):
+        super().__init__(name="WordsOfThePious", disc=disc, n_points=1, buff_duration=10)
+        NotImplementedError() #todo
 
+class TwilightEquilibrium(DiscTalentWrapper):
+
+    def __init__(self, disc: Discipline):
+        super().__init__(name="TwilightEquilibrium", disc=disc, n_points=1, buff_duration=6)
+        NotImplementedError() #todo
