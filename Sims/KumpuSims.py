@@ -41,5 +41,7 @@ stats1 = Stats(main=10000, crit=4000, haste=5000, mast=2000, vers=2000)
 disc1 = Discipline(talents1, stats1)
 DiscSim_test(disc1)
 
+print()
+
 
 
