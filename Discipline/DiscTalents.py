@@ -266,8 +266,21 @@ class Amirdrassil_2p(DiscTalentWrapper):
 class Amirdrassil_4p(DiscTalentWrapper):
 
     def __init__(self, disc: Discipline):
-        super().__init__(name='Amirdrassil_4p', disc=disc, n_points=1, ability=disc.abilities['smite'])
+        super().__init__(name='Amirdrassil_4p', disc=disc, n_points=1)
         self._scov = disc._buffs["SC"]
+        self._smite_4p = disc.abilities['smite_4p']
+        self.disc.cast = self._after_disc_cast(self.disc.cast)
+
+    def _after_disc_cast(self, disc_cast):
+
+        def wrapper_4p(*args, **kwargs):
+            cast_results, timestamp = disc_cast(*args, **kwargs)
+            if self._scov.buff_active:
+                cast_results2, _ = disc_cast(self._smite_4p.name)
+                cast_results.extend(cast_results2)
+            return cast_results, timestamp
+
+        return wrapper_4p
 
     def before_cast(self):
         pass

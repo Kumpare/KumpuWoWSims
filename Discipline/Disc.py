@@ -10,6 +10,7 @@ pd.options.mode.chained_assignment = None
 from Discipline import DiscTalents
 from Discipline.DiscAbilities import DiscAbility, DiscBuff, DiscTickingBuff, DiscAbilityEvent, Penance, SWD_Execute
 from General.ThroughputTypes import ThroughputType
+from General.BuffManagement import BuffManager
 
 
 class Discipline(Specialization):
@@ -83,9 +84,9 @@ class Discipline(Specialization):
             assert key in self.talents, f'Key {key} not a valid talent'
             self.talents[key] = talents[key]
 
-        self.gcd = GCD/stats.stat_to_percent('haste')
-        self.half_gcd = HALF_GCD/stats.stat_to_percent('haste')
-        self.radiance_cast = 2/stats.stat_to_percent('haste')
+        self.gcd = GCD/self.stat_effect("haste")
+        self.half_gcd = HALF_GCD/self.stat_effect("haste")
+        self.radiance_cast = 2/self.stat_effect("haste")
 
         self.pws_atonement_duration = 17 if self.talents['Indemnity'] > 0 else 15
 

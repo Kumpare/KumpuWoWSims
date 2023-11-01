@@ -17,8 +17,10 @@ def DiscSim_test(disc: Discipline):
     disc.cast("pwr")
     disc.cast("pwr")
     disc.cast(pet)
-    disc.cast("mind_blast")
-    disc.cast("penance")
+    disc.cast("smite")
+    disc.cast("smite")
+    disc.cast("smite")
+    disc.cast("smite")
     disc.cast("smite")
 
     result = disc.data

@@ -98,13 +98,16 @@ class Buff(Ability):
     def apply(self, time_applied: float, n_stacks: int = 1):
         self._on_apply()
         self.time_applied = time_applied
-        self._remaining_duration = self._buff_duration
+        self._remaining_duration = np.minimum(self._buff_duration*1.3, self._buff_duration + self._remaining_duration)
         self._stacks = min(self._stacks + n_stacks, self._max_stacks)
 
     @property
     def buff_active(self):
         return self._stacks > 0
 
+    @property
+    def duration(self):
+        return self._buff_duration
     @property
     def remaining_duration(self):
         return self._remaining_duration
@@ -116,13 +119,16 @@ class Buff(Ability):
         pass
 
     def expire(self):
+        self._remaining_duration = 0
+        self._stacks = 0
         self._on_expire()
 
     def _on_expire(self):
         pass
 
     def extend_duration(self, amount: float):
-        self._remaining_duration += amount
+        if self.buff_active:
+            self._remaining_duration += amount
         pass
 
 class TickingBuff(Buff):
@@ -153,7 +159,8 @@ class TickingBuff(Buff):
         if self.buff_active:
             n_ticks, time_from_last_tick = np.divmod(self._time_from_last_tick + t, self._tick_rate)
             self._time_from_last_tick = time_from_last_tick
-        pass
+            return n_ticks
+        return 0
 
     def reduce_remaining_cd(self, t:float):
         self._remaining_cooldown = np.maximum(0, self._remaining_cooldown - t)
@@ -173,6 +180,10 @@ class TickingBuff(Buff):
     def apply(self, time_applied: float, n_stacks: int=1):
         super().apply(time_applied, n_stacks)
         self._time_from_last_tick = 0
+
+    @property
+    def tick_rate(self):
+        return self._tick_rate
 
 
 class AbilityEvent:

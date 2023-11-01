@@ -9,7 +9,7 @@ class ThroughputTracker:
     def __init__(self, disc:Discipline):
 
         self.disc = disc
-        #self.disc.cast = self.track_cast_results(self.disc.cast)
+        self.disc.cast = self.track_cast_results(self.disc.cast)
         self.data = pd.DataFrame(index=['Damage', 'Healing'], dtype=float)
         self.cast_abilities = pd.Series(dtype=str)
 
@@ -34,7 +34,8 @@ class ThroughputTracker:
         def wrapper(*args, **kwargs):
 
             cast_results, timestamp = cast_func(*args, **kwargs)
-            self.handle_ability_event(cast_results, timestamp, args[0])
+            ability_name = kwargs['ability_name'] if 'ability_name' in kwargs else args[0]
+            self.handle_ability_event(cast_results, timestamp, ability_name)
             return cast_results, timestamp
 
         return wrapper
