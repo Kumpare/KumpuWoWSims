@@ -139,7 +139,7 @@ class Schism(DiscTalentWrapper):
         pass
 
     def _on_apply(self):
-        self.disc.throughput_type_effects[ThroughputType.NONE_TYPE] *= self._buff_effect
+        self.disc.throughput_type_dmg_effects[ThroughputType.NONE_TYPE] *= self._buff_effect
 
     def _on_expire(self):
         self.disc.throughput_type_effects[ThroughputType.NONE_TYPE] *= self._reverse_buff_effect

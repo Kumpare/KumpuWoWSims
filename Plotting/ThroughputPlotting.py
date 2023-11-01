@@ -22,7 +22,6 @@ def plot_throughputs(throughputs: Collection[ThroughputTracker], metric_to_track
     for i, throughput in enumerate(throughputs):
         data = throughput.data.loc[metric_to_track, :]
         data = data.sort_values(key=lambda x: x.index)
-        print(data.index)
 
         ps_data = smoothen_data(data) / 1e3
         c_data = data.cumsum() / 1e6
@@ -32,6 +31,16 @@ def plot_throughputs(throughputs: Collection[ThroughputTracker], metric_to_track
         p.set_label(lbl)
 
         c_axis.fill_between(c_data.index, c_data)
+        pwr_casts = throughput.cast_abilities.loc[throughput.cast_abilities == 'pwr']
+
+        if pwr_casts.size == 0:
+            continue
+
+        for t_stamp, _ in pwr_casts.items():
+            col = p.get_color()
+            c_max = c_data.max()
+            c_axis.scatter(t_stamp, c_max, c=col)
+            ps_axis.scatter(t_stamp, 0, c=col)
 
     if labels is not None:
         ps_axis.legend(loc='upper left')
@@ -44,7 +53,7 @@ def smoothen_data(data: pd.Series, ticks: float = 1, radius: float = 1.5) -> pd.
 
     idxs = np.arange(0, last_idx, ticks)
 
-    to_return = pd.Series(index=idxs)
+    to_return = pd.Series(index=idxs, dtype='float32')
     for idx in idxs:
         sub_data = data.loc[np.abs(data.index - idx) <= radius]
         mean = sub_data.sum()/(2*radius)
