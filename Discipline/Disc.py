@@ -95,7 +95,8 @@ class Discipline(Specialization):
         self._active_buffs = dict()
         self._next_buff_id = 0
 
-        self.throughput_type_effects = {tp_type: 1 for tp_type in ThroughputType}
+        self.throughput_type_heal_effects = {tp_type: 1 for tp_type in ThroughputType}
+        self.throughput_type_dmg_effects = {tp_type: 1 for tp_type in ThroughputType}
 
     def progress_time(self, amount: float):
         self.time += amount
@@ -368,14 +369,15 @@ class Discipline(Specialization):
         pass
 
     def get_throughput_type_effect(self, type: ThroughputType):
-        base_increase = self.throughput_type_effects[ThroughputType.NONE_TYPE]
+        base_heal_increase = self.throughput_type_heal_effects[ThroughputType.NONE_TYPE]
+        base_dmg_increase = self.throughput_type_dmg_effects[ThroughputType.NONE_TYPE]
 
-        heal_increase = base_increase
-        dmg_increase = base_increase
+        heal_increase = base_heal_increase
+        dmg_increase = base_dmg_increase
 
         if type != ThroughputType.NONE_TYPE:
-            dmg_increase *= self.throughput_type_effects[type]
-            heal_increase *= self.throughput_type_effects[type]
+            dmg_increase *= self.throughput_type_heal_effects[type]
+            heal_increase *= self.throughput_type_dmg_effects[type]
 
         return heal_increase, dmg_increase
 

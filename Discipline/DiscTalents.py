@@ -212,12 +212,14 @@ class ShadowCovenant(DiscTalentWrapper):
         pass
 
     def _on_apply(self):
-        self.disc.throughput_type_effects[self.throughput_type] *= self._buff_effect
+        self.disc.throughput_type_heal_effects[self.throughput_type] *= self._buff_effect
+        self.disc.throughput_type_dmg_effects[self.throughput_type] *= self._buff_effect
         self._penance.throughput_type = self.throughput_type
         #todo halo ja ds
 
     def _on_expire(self):
-        self.disc.throughput_type_effects[self.throughput_type] *= self._reverse_buff_effect
+        self.disc.throughput_type_heal_effects[self.throughput_type] *= self._reverse_buff_effect
+        self.disc.throughput_type_dmg_effects[self.throughput_type] *= self._reverse_buff_effect
         self._penance.throughput_type = ThroughputType.LIGHT
 
 class VoidSummoner(DiscTalentWrapper):
