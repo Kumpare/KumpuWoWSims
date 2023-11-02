@@ -49,7 +49,7 @@ class Discipline(Specialization):
             'Benevolence': 0,
             'Halo': 0,
             'DS': 0,
-            'Essence Devourer': 0,
+            'ED': 0,
 
             # spec tree
             'DI': 0,
@@ -258,6 +258,10 @@ class Discipline(Specialization):
                 up.n_atonements_applied = 10
                 up.atonement_duration = Discipline._BASE_ATONEMENT_DURATION*0.5
                 up.heal_sp_coef = 10*1.8
+
+        if self.talents['ED'] > 0:
+            bender.heal_sp_coef = 0.6
+            sfiend.heal_sp_coef = 1.8
 
 
 
