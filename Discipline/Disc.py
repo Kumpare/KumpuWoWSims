@@ -267,8 +267,6 @@ class Discipline(Specialization):
             smite._cast_time /= 1 + 0.05*self.talents['UW']
             smite._base_gcd /= 1 + 0.05*self.talents['UW']
 
-
-
     def set_haste(self):
         haste_effect = self.stat_effect("haste")
         self.gcd = gcd_from_haste(haste_effect)

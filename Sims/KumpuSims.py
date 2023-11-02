@@ -107,6 +107,15 @@ def DiscSim_test(disc: Discipline, disc2: Discipline):
 
     plot_throughputs([disc, disc2])
 
+def sim_eva_rotation(disc1: Discipline, disc2 : Discipline):
+
+    disc1_tracker = ThroughputTracker(disc1)
+    disc2_tracker = ThroughputTracker(disc2)
+
+    disc1.cast("pwr")
+    disc1.cast("pwr")
+    plot_throughputs([disc1_tracker])
+
 talents1 = {
     "Schism": 1,
     "PP": 1,
@@ -130,10 +139,14 @@ talents1 = {
     'ED': 1,
     'UW': 2
 }
-stats1 = Stats(main=12000, crit=4000, haste=5000, mast=2000, vers=2000)
+stats1 = Stats(main=12500, crit=5400, haste=5400, mast=2000, vers=2000)
 disc1 = Discipline(talents1, stats1)
-disc2 = Discipline(talents1, stats1)
-DiscSim_test(disc1, disc2)
+
+stats2 = Stats(main=12500, crit=3500, haste=8400, mast=1450, vers=1450)
+disc2 = Discipline(talents1, stats2)
+#DiscSim_test(disc1, disc2)
+
+sim_eva_rotation(disc1, disc2)
 
 
 

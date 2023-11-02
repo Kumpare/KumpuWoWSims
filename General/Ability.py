@@ -32,7 +32,7 @@ class Ability:
 
     @property
     def cast_time(self):
-        return self._cast_time / self._haste_effect
+        return self._cast_time
 
     @property
     def gcd(self):
