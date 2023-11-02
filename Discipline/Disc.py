@@ -318,7 +318,7 @@ class Discipline(Specialization):
         to_return = []
         next_event_time, next_event = self.next_event
         while next_event is not None and next_event_time < time_to_loop_to:
-            next_event_cast_result = next_event.cast(next_event_time)
+            next_event_cast_result = next_event.ability_event(next_event_time)
             if next_event_cast_result is not None:
                 self.calculate_throughput(next_event_cast_result)
                 to_return.append(next_event_cast_result)
@@ -360,7 +360,7 @@ class Discipline(Specialization):
     def apply_buff(self, ability: Buff):
 
         for buff_id, buff in self._active_buffs.items():
-            if type(ability) == type(buff):
+            if ability.name == buff.name:
                 self.refresh_buff(buff_id)
                 buff.apply(self.time + ability.cast_time)
                 return buff_id

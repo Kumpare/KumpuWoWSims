@@ -112,17 +112,24 @@ def sim_eva_rotation(disc1: Discipline, disc2 : Discipline):
     disc1_tracker = ThroughputTracker(disc1)
     disc2_tracker = ThroughputTracker(disc2)
 
-    for disc in [disc1, disc2]:
+    for i, disc in enumerate([disc1, disc2]):
+        disc.cast("pi")
+        disc.cast("lust")
+        print(disc.stat_effect("haste"))
         disc.cast("ptw")
         evangelism_ramp(disc)
         disc.cast("sfiend")
         disc.cast("mind_blast")
         penance_4_smites(disc)
         penance_4_smites(disc)
+        if i == 0:
+            disc.cast("penance")
+        else:
+            penance_4_smites(disc)
         print(disc.abilities['pwr'].remaining_cooldown, disc.abilities['pwr']._charges)
 
-    penance_4_smites(disc2)
-    print(disc2.abilities['pwr'].remaining_cooldown, disc2.abilities['pwr']._charges)
+    #print(disc2.abilities['pwr'].remaining_cooldown, disc2.abilities['pwr']._charges)
+    print(f'Disc 1 sfiend CD: {disc1.abilities["sfiend"].remaining_cooldown}, Disc 2 sfiend CD: {disc2.abilities["sfiend"].remaining_cooldown}')
     plot_throughputs([disc1_tracker, disc2_tracker])
 
 talents1 = {

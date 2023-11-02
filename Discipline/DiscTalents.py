@@ -400,8 +400,12 @@ class TwilightEquilibrium(DiscTalentWrapper):
         def te_wrapper(*args, **kwargs):
             ability_to_cast = kwargs["ability_name"] if "ability_name" in kwargs else args[0]
             ability_to_cast = self.disc.abilities[ability_to_cast]
-            if ability_to_cast.dmg_sp_coef > 0:
-                self._last_cast_type = ability_to_cast.throughput_type
+            try:
+                if ability_to_cast.dmg_sp_coef > 0:
+                    self._last_cast_type = ability_to_cast.throughput_type
+            except AttributeError:
+                ability_events, timestamp = disc_cast(*args, **kwargs)
+                return ability_events, timestamp
             ability_events, timestamp = disc_cast(*args, **kwargs)
             if self._last_cast_type in (ThroughputType.LIGHT, ThroughputType.SHADOW):
                 if self.buff_active and self._curr_applied_type == self._last_cast_type:

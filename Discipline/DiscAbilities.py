@@ -58,6 +58,11 @@ class DiscHasteBuff(Buff):
     def _on_expire(self):
         self.disc.stat_increases["haste"] *= self._reverse_buff_effect
 
+    def ability_event(self, cast_start_time: float):
+        to_return = DiscAbilityEvent(dmg=0, heal=0, timestamp=cast_start_time,
+                                     ability_name=self.name, throughput_type=ThroughputType.NONE_TYPE, procs_atonement=False)
+        return to_return
+
 
 class DiscTickingBuff(TickingBuff):
 
