@@ -7,7 +7,7 @@ TODO:
 
 Missing features:
 
-Holy Nova, Divine Star, Shadow Word: Pain (purge the wicked is implemented), PTW and SW:P on-cast damage application, Mind games, PW:L, Throes of Pain, Unwavering Will, Benevolence (redundant), Expiation, Weal and Woe, Divine Aegis, Enduring Luminescense,
+Holy Nova, Divine Star, Shadow Word: Pain (purge the wicked is implemented), PTW and SW:P on-cast damage application, Mind games, PW:L, Throes of Pain, Benevolence (redundant), Expiation, Weal and Woe, Divine Aegis, Enduring Luminescense,
 Sanctuary, Malicious Intent, Exaltation, Contrition, Leech in its entirety (redundant), Crystalline Reflection
 
 Known bugs:
