@@ -9,6 +9,8 @@ class Ability:
                  haste_effect: float = 1.,
                  charges: int = 1):
         self._cast_time = cast_time
+        self._base_cast_time = cast_time
+        self._base_gcd = gcd
         self._gcd = gcd
         self._base_cooldown = cooldown
         self._remaining_cooldown = 0.
@@ -34,7 +36,7 @@ class Ability:
 
     @property
     def gcd(self):
-        return np.maximum(self._gcd / self._haste_effect, GCD_CAP)
+        return np.maximum(self._gcd, self._base_gcd/2)
 
     @property
     def cast_times(self):
@@ -50,7 +52,7 @@ class Ability:
 
     @property
     def cooldown(self):
-        return self._base_cooldown / (1 + (1 - self._haste_effect) * int(self._cooldown_haste_scale))
+        return self._base_cooldown / (1 + (self._haste_effect - 1) * int(self._cooldown_haste_scale))
 
     def progress_time(self, t: float):
         if self.remaining_cooldown <= 0:
@@ -59,12 +61,14 @@ class Ability:
         self._remaining_cooldown -= t
         if self._remaining_cooldown < 0:
             self._charges += 1
-            self._remaining_cooldown = self.cooldown + self.remaining_cooldown if self._charges == self._max_charges else 0
+            self._remaining_cooldown = self.cooldown + self.remaining_cooldown if self._charges < self._max_charges else 0
 
     def set_haste(self, haste_effect: float):
         cd_progress = self.remaining_cooldown / self.cooldown if self.cooldown > 0 else 0
         self._haste_effect = haste_effect
         self._remaining_cooldown = cd_progress * self.cooldown
+        self._gcd = self._base_gcd / self._haste_effect
+        self._cast_time = self._base_cast_time / self._haste_effect
 
     def ability_event(self, cast_start_time: float):
         NotImplementedError()
@@ -119,9 +123,9 @@ class Buff(Ability):
         pass
 
     def expire(self):
+        self._on_expire()
         self._remaining_duration = 0
         self._stacks = 0
-        self._on_expire()
 
     def _on_expire(self):
         pass

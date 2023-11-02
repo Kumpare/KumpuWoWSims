@@ -111,3 +111,4 @@ class Penance(DiscAbility):
         to_return = DiscAbilityEvent(dmg=self.dmg_sp_coef*self.n_bolts, heal=self.heal_sp_coef*self.n_bolts, timestamp=cast_start_time + self.cast_time,
                                      ability_name=self.name, procs_atonement=self.procs_atonement, throughput_type=self.throughput_type)
         return to_return
+

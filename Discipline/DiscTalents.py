@@ -236,7 +236,7 @@ class VoidSummoner(DiscTalentWrapper):
         self._penance = disc.abilities["penance"]
         self._mind_blast = disc.abilities["mind_blast"]
 
-        for ability in [self._smite, self._penance, self._mind_blast]:
+        for ability in [self._smite, self._smite_4p, self._penance, self._mind_blast]:
             ability.cast = self._decorator(ability_cast=ability.cast)
 
     def before_cast(self):
@@ -275,7 +275,7 @@ class Amirdrassil_4p(DiscTalentWrapper):
 
         def wrapper_4p(*args, **kwargs):
             cast_results, timestamp = disc_cast(*args, **kwargs)
-            if self._scov.buff_active:
+            if self._scov.buff_active and kwargs['ability_name'] == 'smite':
                 cast_results2, _ = disc_cast(self._smite_4p.name)
                 cast_results.extend(cast_results2)
             return cast_results, timestamp
@@ -347,17 +347,94 @@ class HarshDiscipline(DiscTalentWrapper):
         self._penance_heal.n_bolts += self.n_points
 
     def _on_expire(self):
-        self._penance.n_bolts -= self.n_points*self._stacks
-        self._penance.n_bolts -= self.n_points*self._stacks
+        self._penance.n_bolts -= self._stacks*self.n_points
+        self._penance_heal.n_bolts -= self._stacks*self.n_points
 
 class WordsOfThePious(DiscTalentWrapper):
 
     def __init__(self, disc: Discipline):
         super().__init__(name="WordsOfThePious", disc=disc, n_points=1, buff_duration=10)
-        NotImplementedError() #todo
+
+        self._buff_effect = 1.1
+        self._reverse_buff_effect = 1/1.1
+        self._pws = disc.abilities["pws"]
+        self._pws_rapture = disc.abilities["pws_rapture"]
+        self._smite = disc.abilities["smite"]
+        self._smite_4p = disc.abilities["smite_4p"]
+
+        self._pws.cast = self._decorator_after(self._pws.cast)
+        self._pws_rapture.cast = self._decorator_after(self._pws_rapture.cast)
+
+    def before_cast(self):
+        pass
+
+    def after_cast(self):
+        self.disc.apply_buff(self)
+
+    def _on_apply(self):
+        self._smite.dmg_sp_coef *= self._buff_effect
+        self._smite_4p.dmg_sp_coef *= self._buff_effect
+
+    def _on_expire(self):
+        self._smite.dmg_sp_coef *= self._reverse_buff_effect
+        self._smite_4p.dmg_sp_coef *= self._reverse_buff_effect
 
 class TwilightEquilibrium(DiscTalentWrapper):
 
     def __init__(self, disc: Discipline):
         super().__init__(name="TwilightEquilibrium", disc=disc, n_points=1, buff_duration=6)
-        NotImplementedError() #todo
+        self._buff_effect = 1.15
+        self._reverse_buff_effect = 1/1.15
+        self._last_cast_type = None
+        self._curr_applied_type = None
+
+        self.disc.cast = self._disc_cast_after(self.disc.cast)
+
+    def _disc_cast_after(self, disc_cast):
+
+        def te_wrapper(*args, **kwargs):
+            ability_to_cast = kwargs["ability_name"] if "ability_name" in kwargs else args[0]
+            ability_to_cast = self.disc.abilities[ability_to_cast]
+            if ability_to_cast.dmg_sp_coef > 0:
+                self._last_cast_type = ability_to_cast.throughput_type
+            ability_events, timestamp = disc_cast(*args, **kwargs)
+            if self._last_cast_type in (ThroughputType.LIGHT, ThroughputType.SHADOW):
+                if self.buff_active and self._curr_applied_type == self._last_cast_type:
+                    self.disc.consume_buff(buff=self)
+                self.disc.apply_buff(self)
+            return ability_events, timestamp
+
+        return te_wrapper
+
+    def before_cast(self):
+        pass
+
+    def after_cast(self):
+        pass
+
+    def _on_apply(self):
+        applied_type = ThroughputType.LIGHT if self._last_cast_type == ThroughputType.SHADOW else ThroughputType.SHADOW
+        if applied_type == self._curr_applied_type:
+            return
+        self.disc.throughput_type_dmg_effects[applied_type] *= self._buff_effect
+        self._curr_applied_type = applied_type
+
+    def _on_expire(self):
+        self.disc.throughput_type_dmg_effects[self._curr_applied_type] *= self._reverse_buff_effect
+        self._curr_applied_type = None
+
+
+class Evangelism(DiscTalentWrapper):
+
+    def __init__(self, disc: Discipline):
+        super().__init__("Evangelism", disc=disc, n_points=1, buff_duration=0)
+        self._extend_duration = 6
+        self._evangelism = disc.abilities["evangelism"]
+        self._evangelism.cast = self._decorator(self._evangelism.cast)
+
+    def before_cast(self):
+        atonement_handler = self.disc.active_atonements
+        atonement_handler.active_atonements[atonement_handler.target_has_atonement] += self._extend_duration
+
+    def after_cast(self):
+        pass

@@ -1,7 +1,7 @@
 from General.Spec import Specialization
 from typing import Union
 from General.Stats import Stats
-from General.math import partially_linear_function
+from General.math import gcd_from_haste
 from General.Constants import *
 import numpy as np
 from General.Ability import Ability, Buff, TickingBuff, AbilityEvent
@@ -84,9 +84,9 @@ class Discipline(Specialization):
             assert key in self.talents, f'Key {key} not a valid talent'
             self.talents[key] = talents[key]
 
-        self.gcd = GCD/self.stat_effect("haste")
-        self.half_gcd = HALF_GCD/self.stat_effect("haste")
-        self.radiance_cast = 2/self.stat_effect("haste")
+        self.gcd = GCD
+        self.half_gcd = HALF_GCD
+        self.radiance_cast = 2
 
         self.pws_atonement_duration = 17 if self.talents['Indemnity'] > 0 else 15
 
@@ -98,6 +98,7 @@ class Discipline(Specialization):
 
         self.throughput_type_heal_effects = {tp_type: 1 for tp_type in ThroughputType}
         self.throughput_type_dmg_effects = {tp_type: 1 for tp_type in ThroughputType}
+        self.set_haste()
 
     def progress_time(self, amount: float):
         self.time += amount
@@ -150,7 +151,7 @@ class Discipline(Specialization):
                           atonement_duration=Discipline._BASE_RADIANCE_ATONEMENT_DURATION_MODIFIER*15)
 
         # Renew
-        renew = DiscAbility('renew', haste_effect=h, heal_sp_coef=2.37*h)
+        renew = DiscAbility('renew', haste_effect=h, heal_sp_coef=2.37*h, n_atonements_applied=1)
 
         # Flash heal todo: self atonement proc
         flash_heal = DiscAbility('flash_heal', cast_time=1.5, haste_effect=h, heal_sp_coef=4.77*1.2, n_atonements_applied=1)
@@ -175,9 +176,10 @@ class Discipline(Specialization):
         ptw = DiscTickingBuff('ptw', haste_effect=h, buff_duration=20, sp_coef=1.69/1.09*1.05, tick_rate=2, procs_atonement=True)
 
         halo = DiscAbility('halo', cooldown=45, haste_effect=h, dmg_sp_coef=1, heal_sp_coef=1, procs_atonement=True, throughput_type=ThroughputType.LIGHT)
+        evangelism = DiscAbility('evangelism', cooldown=90, haste_effect=h, gcd=HALF_GCD)
         self.abilities = {}
         for ability in [pws, pws_rapture, pwr, renew, flash_heal, penance_heal, penance, smite, mind_blast,
-                        swd, swd_execute, bender, sfiend, ptw, smite_4p, halo]:
+                        swd, swd_execute, bender, sfiend, ptw, smite_4p, halo, evangelism]:
 
             self.abilities[ability.name] = ability
 
@@ -212,7 +214,6 @@ class Discipline(Specialization):
 
         if self.talents["VS"] > 0:
             DiscTalents.VoidSummoner(self)
-            DiscTalents.VoidSummoner(self)
 
         it = None
         if self.talents["IT"] > 0:
@@ -233,10 +234,19 @@ class Discipline(Specialization):
             self.abilities['penance'].n_bolts += 1
             self.abilities['penance_heal'].n_bolts += 1
 
+        if self.talents["Evangelism"] > 0:
+            DiscTalents.Evangelism(self)
+
+        if self.talents['WotP'] > 0:
+            DiscTalents.WordsOfThePious(self)
+
+        if self.talents['TE'] > 0:
+            DiscTalents.TwilightEquilibrium(self)
+
     def set_haste(self):
         haste_effect = self.stat_effect("haste")
-        self.gcd = GCD / haste_effect
-        self.half_gcd = HALF_GCD / haste_effect
+        self.gcd = gcd_from_haste(haste_effect)
+        self.half_gcd = self.gcd/2
         self.radiance_cast = 2 / haste_effect
         for ability in self.abilities.values():
             ability.set_haste(haste_effect)
@@ -254,12 +264,14 @@ class Discipline(Specialization):
         if ability_to_cast.remaining_cooldown > 0 and ability_to_cast._charges == 0:
             self.progress_time(ability_to_cast.remaining_cooldown)
 
+        start_time = self.time
+        next_event = ability_to_cast.cast(self.time)
         cast_time = ability_to_cast.cast_time
+        end_time = start_time + ability_to_cast.time_taken
+
         looped_events = self.loop_through_events_until(self.time + cast_time)
         to_return.extend(looped_events)
 
-        next_event = ability_to_cast.cast(self.time)
-        end_time = self.time + ability_to_cast.time_taken
         if isinstance(ability_to_cast, Buff):
             self.apply_buff(ability_to_cast)
 
@@ -272,7 +284,7 @@ class Discipline(Specialization):
                 if ability_name == "flash_heal":
                     self.active_atonements.add_atonement(1, duration=ability_to_cast.atonement_duration + ability_to_cast.cast_time, player_ind=19)
 
-        looped_events2 = self.loop_through_events_until(self.time + ability_to_cast.time_taken)
+        looped_events2 = self.loop_through_events_until(end_time)
         to_return.extend(looped_events2)
         self.progress_time(end_time - self.time)
         to_return.append(next_event)
@@ -326,6 +338,7 @@ class Discipline(Specialization):
         for buff_id, buff in self._active_buffs.items():
             if type(ability) == type(buff):
                 self.refresh_buff(buff_id)
+                buff.apply(self.time + ability.cast_time)
                 return buff_id
         ability.apply(self.time + ability.cast_time)
         self.active_buffs.loc[self._next_buff_id, ['Expiration time', 'ID']] = self.time + ability.remaining_duration + ability.cast_time, self._next_buff_id
