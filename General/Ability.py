@@ -25,7 +25,7 @@ class Ability:
     def base_cast(self, cast_start_time: float):
         if self.remaining_cooldown > 0 and self._charges == 0:
             raise ValueError(f'Ability {self.name} is still on cooldown')
-        self._remaining_cooldown = self.cooldown if self._charges == self._max_charges else self._remaining_cooldown
+        self._remaining_cooldown = self.cooldown + self.cast_time if self._charges == self._max_charges else self._remaining_cooldown
         self._charges -= 1
         to_return = self.ability_event(cast_start_time)
         return to_return
@@ -64,9 +64,10 @@ class Ability:
             self._remaining_cooldown = self.cooldown + self.remaining_cooldown if self._charges < self._max_charges else 0
 
     def set_haste(self, haste_effect: float):
-        cd_progress = self.remaining_cooldown / self.cooldown if self.cooldown > 0 else 0
         self._haste_effect = haste_effect
-        self._remaining_cooldown = cd_progress * self.cooldown
+        if self._cooldown_haste_scale:
+            cd_progress = self.remaining_cooldown / self.cooldown if self.cooldown > 0 else 0
+            self._remaining_cooldown = cd_progress * self.cooldown
         self._gcd = self._base_gcd / self._haste_effect
         self._cast_time = self._base_cast_time / self._haste_effect
 

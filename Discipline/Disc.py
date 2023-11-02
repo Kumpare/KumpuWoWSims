@@ -396,14 +396,16 @@ class Discipline(Specialization):
         if buff_id is not None:
             active_buff = self._active_buffs.pop(buff_id)
             active_buff.expire()
-            self.active_buffs.drop((self.active_buffs['ID'] == buff_id).index, inplace=True)
+            indices_to_drop = self.active_buffs.loc[self.active_buffs['ID'] == buff_id].index
+            self.active_buffs.drop(indices_to_drop, axis=0, inplace=True)
             return
 
         buff_id = self.find_buff_id(buff)
         assert buff_id is not None, f'Could not consume buff {buff}, because such buff was not found.'
         buff.expire()
         self._active_buffs.pop(buff_id)
-        self.active_buffs.drop((self.active_buffs['ID']==buff_id).index, inplace=True)
+        indices_to_drop = self.active_buffs.loc[self.active_buffs['ID'] == buff_id].index
+        self.active_buffs.drop(indices_to_drop, axis=0, inplace=True)
         pass
 
     def get_throughput_type_effect(self, type: ThroughputType):

@@ -114,18 +114,13 @@ def sim_eva_rotation(disc1: Discipline, disc2 : Discipline):
 
     for i, disc in enumerate([disc1, disc2]):
         disc.cast("pi")
-        disc.cast("lust")
-        print(disc.stat_effect("haste"))
         disc.cast("ptw")
         evangelism_ramp(disc)
         disc.cast("sfiend")
         disc.cast("mind_blast")
         penance_4_smites(disc)
         penance_4_smites(disc)
-        if i == 0:
-            disc.cast("penance")
-        else:
-            penance_4_smites(disc)
+
         print(disc.abilities['pwr'].remaining_cooldown, disc.abilities['pwr']._charges)
 
     #print(disc2.abilities['pwr'].remaining_cooldown, disc2.abilities['pwr']._charges)
