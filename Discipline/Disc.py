@@ -260,8 +260,8 @@ class Discipline(Specialization):
                 up.heal_sp_coef = 10*1.8
 
         if self.talents['ED'] > 0:
-            bender.heal_sp_coef = 0.6
-            sfiend.heal_sp_coef = 1.8
+            bender.heal_sp_coef = 0.6*12
+            sfiend.heal_sp_coef = 1.8*15
 
 
 
