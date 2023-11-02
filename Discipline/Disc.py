@@ -315,19 +315,20 @@ class Discipline(Specialization):
 
     def calculate_throughput(self, ability_event: DiscAbilityEvent):
         #todo käytä stat_effectiä
-        crit_effect = 1 + self.stat_to_percent("crit")*(1.2 if "DA" in self.talents else 1)
-        vers_effect = 1 + self.stat_to_percent("vers")
+        crit_effect = self.stat_effect("crit")
+        crit_effect = crit_effect + (crit_effect - 1)*(1.2 if "DA" in self.talents else 1)
+        vers_effect = self.stat_effect("vers")
         throughput_type_effect_heal, throughput_type_effect_dmg = self.get_throughput_type_effect(ability_event.throughput_type)
         ability_event.dmg *= self.stats.main*crit_effect*vers_effect*throughput_type_effect_dmg
         ability_event.heal *= self.stats.main*crit_effect*vers_effect*throughput_type_effect_heal
 
         if ability_event.procs_atonement and ability_event.dmg > 0:
-            mastery_effect = 1 + self.stat_to_percent("mast")
+            mastery_effect = self.stat_effect("mast")
             n_atonements = self.active_atonements.n_atonements
             ab_effect = self._ab_effect
             atonement_heal = ability_event.dmg*Discipline._BASE_ATONEMENT_TRANSFER*n_atonements*self.get_sins_multiplier(n_atonements)
             atonement_heal *= ab_effect if ability_event.throughput_type == ThroughputType.SHADOW else 1
-            atonement_heal *= crit_effect*vers_effect*mastery_effect
+            atonement_heal *= mastery_effect
             ability_event.heal += atonement_heal
 
     def get_sins_multiplier(self, n_atonements: int):
