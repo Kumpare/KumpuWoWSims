@@ -126,7 +126,7 @@ talents1 = {
     "WotP": 1,
     "TE": 1,
 }
-stats1 = Stats(main=10000, crit=4000, haste=5000, mast=2000, vers=2000)
+stats1 = Stats(main=12000, crit=4000, haste=5000, mast=2000, vers=2000)
 disc1 = Discipline(talents1, stats1)
 disc2 = Discipline(talents1, stats1)
 DiscSim_test(disc1, disc2)

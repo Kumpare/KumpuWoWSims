@@ -98,6 +98,7 @@ class Discipline(Specialization):
 
         self.throughput_type_heal_effects = {tp_type: 1 for tp_type in ThroughputType}
         self.throughput_type_dmg_effects = {tp_type: 1 for tp_type in ThroughputType}
+        self.throughput_type_dmg_effects[ThroughputType.NONE_TYPE] *= 1.05 #dh & monk debuff
         self.set_haste()
 
     def progress_time(self, amount: float):

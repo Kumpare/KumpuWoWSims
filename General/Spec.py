@@ -7,10 +7,10 @@ class Specialization:
     def __init__(self, stats: Stats = Stats()):
         self.stats = stats
         self.stat_increases = {
-            'main': 1,
+            'main': 1.05,
             'haste': 1.01,
             'crit': 1,
-            'vers': 1,
+            'vers': 1.03,
             'mast': 1,
         }
 
