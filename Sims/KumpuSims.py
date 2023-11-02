@@ -2,31 +2,32 @@ from Discipline.Disc import DiscAbility, DiscTickingBuff, Discipline
 from General.ThroughputTracker import ThroughputTracker
 from General.Stats import Stats
 from Plotting.ThroughputPlotting import plot_throughputs
+from typing import Union
 
-def pws_2_renews(disc: ThroughputTracker):
+def pws_2_renews(disc: Union[Discipline, ThroughputTracker]):
     disc.cast("pws")
     disc.cast("renew")
     disc.cast("renew")
     pass
 
-def pws_3_renews(disc: ThroughputTracker):
+def pws_3_renews(disc: Union[Discipline, ThroughputTracker]):
     pws_2_renews(disc)
     disc.cast("renew")
     pass
 
-def cast_renew_until_pws_up(disc: ThroughputTracker):
+def cast_renew_until_pws_up(disc: Union[Discipline, ThroughputTracker]):
     pws = disc.disc.abilities["pws"]
 
     while pws.remaining_cooldown > 0:
         disc.cast("renew")
 
-def penance_4_smites(disc: ThroughputTracker):
+def penance_4_smites(disc: Union[Discipline, ThroughputTracker]):
     disc.cast("penance")
     for _ in range(4):
         disc.cast("smite")
     pass
 
-def cast_smite_until_penance_is_up(disc: ThroughputTracker):
+def cast_smite_until_penance_is_up(disc: Union[Discipline, ThroughputTracker]):
 
     penance = disc.disc.abilities["penance"]
 
@@ -35,7 +36,7 @@ def cast_smite_until_penance_is_up(disc: ThroughputTracker):
 
     pass
 
-def cast_rapture_pws(disc: ThroughputTracker):
+def cast_rapture_pws(disc: Union[Discipline, ThroughputTracker]):
 
     rapture_pws = disc.disc.abilities["pws_rapture"]
 
@@ -47,7 +48,7 @@ def cast_rapture_pws(disc: ThroughputTracker):
 
     pass
 
-def evangelism_ramp(disc: ThroughputTracker):
+def evangelism_ramp(disc: Union[Discipline, ThroughputTracker]):
 
 
     # 4 atonements
@@ -65,7 +66,6 @@ def evangelism_ramp(disc: ThroughputTracker):
     disc.cast("pwr")
     disc.cast("pwr")
     disc.cast("evangelism")
-
 
 
 def DiscSim_test(disc: Discipline, disc2: Discipline):
@@ -112,9 +112,18 @@ def sim_eva_rotation(disc1: Discipline, disc2 : Discipline):
     disc1_tracker = ThroughputTracker(disc1)
     disc2_tracker = ThroughputTracker(disc2)
 
-    disc1.cast("pwr")
-    disc1.cast("pwr")
-    plot_throughputs([disc1_tracker])
+    for disc in [disc1, disc2]:
+        disc.cast("ptw")
+        evangelism_ramp(disc)
+        disc.cast("sfiend")
+        disc.cast("mind_blast")
+        penance_4_smites(disc)
+        penance_4_smites(disc)
+        print(disc.abilities['pwr'].remaining_cooldown, disc.abilities['pwr']._charges)
+
+    penance_4_smites(disc2)
+    print(disc2.abilities['pwr'].remaining_cooldown, disc2.abilities['pwr']._charges)
+    plot_throughputs([disc1_tracker, disc2_tracker])
 
 talents1 = {
     "Schism": 1,
@@ -123,8 +132,8 @@ talents1 = {
     "SC": 1,
     "VS": 1,
     "Castigation": 1,
-    "Bender": 1,
-    "HD": 2,
+    "Bender": 0,
+    "HD": 1,
     "BoL": 2,
     "IT": 1,
     "AR": 2,

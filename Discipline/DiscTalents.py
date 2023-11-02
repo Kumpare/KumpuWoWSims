@@ -279,7 +279,8 @@ class Amirdrassil_4p(DiscTalentWrapper):
 
         def wrapper_4p(*args, **kwargs):
             cast_results, timestamp = disc_cast(*args, **kwargs)
-            if self._scov.buff_active and kwargs['ability_name'] == 'smite':
+            ability_name = kwargs['ability_name'] if 'ability_name' in kwargs else args[0]
+            if self._scov.buff_active and ability_name == 'smite':
                 cast_results2, _ = disc_cast(self._smite_4p.name)
                 cast_results.extend(cast_results2)
             return cast_results, timestamp
