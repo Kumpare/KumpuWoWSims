@@ -263,6 +263,10 @@ class Discipline(Specialization):
             bender.heal_sp_coef = 0.6*12
             sfiend.heal_sp_coef = 1.8*15
 
+        if self.talents['UW'] > 0:
+            smite._cast_time /= 1 + 0.05*self.talents['UW']
+            smite._base_gcd /= 1 + 0.05*self.talents['UW']
+
 
 
     def set_haste(self):
