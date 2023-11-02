@@ -202,8 +202,10 @@ class ShadowCovenant(DiscTalentWrapper):
         self._mind_blast = self.disc.abilities['mind_blast']
         self._swd = self.disc.abilities['swd']
         self._swd_execute = self.disc.abilities['swd_execute']
+        self._halo = self.disc.abilities['halo']
 
-        #todo: halo ja ds
+
+        #todo: ds
 
     def before_cast(self):
         self.id = self.disc.apply_buff(self)
@@ -215,12 +217,14 @@ class ShadowCovenant(DiscTalentWrapper):
         self.disc.throughput_type_heal_effects[self.throughput_type] *= self._buff_effect
         self.disc.throughput_type_dmg_effects[self.throughput_type] *= self._buff_effect
         self._penance.throughput_type = self.throughput_type
-        #todo halo ja ds
+        self._halo.throughput_type = self.throughput_type
+        #todo ds
 
     def _on_expire(self):
         self.disc.throughput_type_heal_effects[self.throughput_type] *= self._reverse_buff_effect
         self.disc.throughput_type_dmg_effects[self.throughput_type] *= self._reverse_buff_effect
         self._penance.throughput_type = ThroughputType.LIGHT
+        self._halo.throughput_type = ThroughputType.LIGHT
 
 class VoidSummoner(DiscTalentWrapper):
 
@@ -423,7 +427,6 @@ class TwilightEquilibrium(DiscTalentWrapper):
         self.disc.throughput_type_dmg_effects[self._curr_applied_type] *= self._reverse_buff_effect
         self._curr_applied_type = None
 
-
 class Evangelism(DiscTalentWrapper):
 
     def __init__(self, disc: Discipline):
@@ -437,4 +440,25 @@ class Evangelism(DiscTalentWrapper):
         atonement_handler.active_atonements[atonement_handler.target_has_atonement] += self._extend_duration
 
     def after_cast(self):
+        pass
+
+class HeavensWrath(DiscTalentWrapper):
+
+    def __init__(self, disc: Discipline, n_points: int):
+        super().__init__("HW", disc=disc, n_points=n_points)
+
+        self._penance = disc.abilities['penance']
+        self._up = disc.abilities['up']
+        self._cdr_reduction_per_bolt = self.n_points
+
+        self._penance.cast = self._decorator(self._penance.cast)
+        self._bolts_fired = 0
+
+    def after_cast(self):
+        self._up.progress_time(self._bolts_fired*self._cdr_reduction_per_bolt)
+        pass
+
+
+    def before_cast(self):
+        self._bolts_fired = self._penance.n_bolts
         pass

@@ -8,7 +8,7 @@ from General.Ability import Ability, Buff, TickingBuff, AbilityEvent
 import pandas as pd
 pd.options.mode.chained_assignment = None
 from Discipline import DiscTalents
-from Discipline.DiscAbilities import DiscAbility, DiscBuff, DiscTickingBuff, DiscAbilityEvent, Penance, SWD_Execute
+from Discipline.DiscAbilities import DiscAbility, DiscBuff, DiscTickingBuff, DiscAbilityEvent, Penance, SWD_Execute, DiscHasteBuff
 from General.ThroughputTypes import ThroughputType
 from General.BuffManagement import BuffManager
 
@@ -77,7 +77,9 @@ class Discipline(Specialization):
             'Expiation': 0,
             'VS': 0,
             'IT': 0,
-            'Bender': 0
+            'Bender': 0,
+            'HW': 0,
+            'OwL': 0
         }
         self._buffs = dict()
         for key in talents:
@@ -159,10 +161,10 @@ class Discipline(Specialization):
 
         # Penance
         penance_heal = Penance(haste_effect=h, heal_sp_coef=1.287*1.5)
-        penance = Penance(haste_effect=h, dmg_sp_coef=0.414*1.15*1.32/1.09, procs_atonement=True)
+        penance = Penance(haste_effect=h, dmg_sp_coef=0.414*1.2*1.32/1.09, procs_atonement=True)
 
         # Smite
-        smite = DiscAbility('smite', cast_time=GCD, haste_effect=h, dmg_sp_coef=0.55*1.15/1.09, procs_atonement=True, throughput_type=ThroughputType.LIGHT)
+        smite = DiscAbility('smite', cast_time=GCD, haste_effect=h, dmg_sp_coef=0.55*1.2/1.09, procs_atonement=True, throughput_type=ThroughputType.LIGHT)
         smite_4p = DiscAbility('smite_4p', cast_time=0, gcd=0, dmg_sp_coef=0.55*1.15/1.09, procs_atonement=True, throughput_type=ThroughputType.SHADOW)
 
         mind_blast = DiscAbility('mind_blast', cast_time=GCD, haste_effect=h, cooldown=24, cooldown_haste_scale=True,
@@ -178,9 +180,13 @@ class Discipline(Specialization):
 
         halo = DiscAbility('halo', cooldown=45, haste_effect=h, dmg_sp_coef=1, heal_sp_coef=1, procs_atonement=True, throughput_type=ThroughputType.LIGHT)
         evangelism = DiscAbility('evangelism', cooldown=90, haste_effect=h, gcd=HALF_GCD)
+        pi = DiscHasteBuff('pi', self, cooldown=120, buff_effect=1.2, buff_duration=15)
+        lust = DiscHasteBuff('lust', self, cooldown=600, buff_effect=1.3, buff_duration=40)
+
+        up = DiscAbility('up', cooldown=240, cast_time=1.5, gcd=7.5, haste_effect=h, dmg_sp_coef=0.8*24, procs_atonement=True, throughput_type=ThroughputType.LIGHT)
         self.abilities = {}
         for ability in [pws, pws_rapture, pwr, renew, flash_heal, penance_heal, penance, smite, mind_blast,
-                        swd, swd_execute, bender, sfiend, ptw, smite_4p, halo, evangelism]:
+                        swd, swd_execute, bender, sfiend, ptw, smite_4p, halo, evangelism, pi, lust, up]:
 
             self.abilities[ability.name] = ability
 
@@ -243,6 +249,15 @@ class Discipline(Specialization):
 
         if self.talents['TE'] > 0:
             DiscTalents.TwilightEquilibrium(self)
+
+        if self.talents['HW'] > 0:
+            DiscTalents.HeavensWrath(self, self.talents['HW'])
+            if self.talents['OwL']:
+                up.n_atonements_applied = 10
+                up.atonement_duration = Discipline._BASE_ATONEMENT_DURATION*0.5
+                up.heal_sp_coef = 10*1.8
+
+
 
     def set_haste(self):
         haste_effect = self.stat_effect("haste")
@@ -315,7 +330,6 @@ class Discipline(Specialization):
         return next_event_time, next_event
 
     def calculate_throughput(self, ability_event: DiscAbilityEvent):
-        #todo käytä stat_effectiä
         crit_effect = self.stat_effect("crit")
         crit_effect = crit_effect + (crit_effect - 1)*(1.2 if "DA" in self.talents else 1)
         vers_effect = self.stat_effect("vers")

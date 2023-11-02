@@ -125,6 +125,8 @@ talents1 = {
     "ToT": 1,
     "WotP": 1,
     "TE": 1,
+    'HW': 2,
+    'OwL': 1
 }
 stats1 = Stats(main=12000, crit=4000, haste=5000, mast=2000, vers=2000)
 disc1 = Discipline(talents1, stats1)

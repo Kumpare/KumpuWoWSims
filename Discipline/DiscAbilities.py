@@ -44,6 +44,21 @@ class DiscBuff(Buff):
         self.disc = disc
 
 
+class DiscHasteBuff(Buff):
+
+    def __init__(self, name: str, disc: Discipline, buff_effect: float, buff_duration: float, cooldown: float = 0):
+        super().__init__(name=name, buff_duration=buff_duration, cooldown=cooldown)
+        self.disc = disc
+        self._buff_effect = buff_effect
+        self._reverse_buff_effect = 1/self._buff_effect
+
+    def _on_apply(self):
+        self.disc.stat_increases["haste"] *= self._buff_effect
+
+    def _on_expire(self):
+        self.disc.stat_increases["haste"] *= self._reverse_buff_effect
+
+
 class DiscTickingBuff(TickingBuff):
 
     def __init__(self, name: str, cast_time: float = 0., gcd: float = GCD,
