@@ -183,7 +183,7 @@ class Discipline(Specialization):
         pi = DiscHasteBuff('pi', self, cooldown=120, buff_effect=1.2, buff_duration=15)
         lust = DiscHasteBuff('lust', self, cooldown=600, buff_effect=1.3, buff_duration=40)
 
-        up = DiscAbility('up', cooldown=240, cast_time=1.5, gcd=7.5, haste_effect=h, dmg_sp_coef=0.8*24, procs_atonement=True, throughput_type=ThroughputType.LIGHT)
+        up = DiscAbility('up', cooldown=240, cast_time=1.5, gcd=7.5, haste_effect=h, dmg_sp_coef=0.8*24*1.2, procs_atonement=True, throughput_type=ThroughputType.LIGHT)
         self.abilities = {}
         for ability in [pws, pws_rapture, pwr, renew, flash_heal, penance_heal, penance, smite, mind_blast,
                         swd, swd_execute, bender, sfiend, ptw, smite_4p, halo, evangelism, pi, lust, up]:
@@ -230,9 +230,11 @@ class Discipline(Specialization):
 
 
         if self.talents["BoL"] > 0:
-            penance.dmg_sp_coef *= (1.08 if self.talents["BoL"] == 1 else 1.15)
-            smite.dmg_sp_coef *= (1.08 if self.talents["BoL"] == 1 else 1.15)
-            smite_4p.dmg_sp_coef *= (1.08 if self.talents["BoL"] == 1 else 1.15)
+            bol_amount = 1.08 if self.talents["BoL"] == 1 else 1.15
+            penance.dmg_sp_coef *= bol_amount
+            smite.dmg_sp_coef *= bol_amount
+            smite_4p.dmg_sp_coef *= bol_amount
+            up.dmg_sp_coef *= bol_amount
 
         if self.talents["HD"] > 0:
             DiscTalents.HarshDiscipline(self)
