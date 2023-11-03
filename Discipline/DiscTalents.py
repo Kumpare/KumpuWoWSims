@@ -7,6 +7,7 @@ from Discipline.DiscAbilities import DiscBuff, DiscAbility, DiscTickingBuff
 from General.Constants import *
 from typing import Union
 from General.ThroughputTypes import ThroughputType
+import numpy as np
 
 
 class DiscTalentWrapper(DiscBuff):
@@ -151,27 +152,14 @@ class DarkIndulgence(DiscTalentWrapper):
         super().__init__(name="DI", disc=disc, n_points=1, ability=disc.abilities["mind_blast"], gcd=0,
                          buff_duration=30)
 
-        self._penance = self.disc.abilities["penance"]
-        self._penance_heal = self.disc.abilities['penance_heal']
-        self._penance.cast = self._consume_self(self._penance.cast)
-        self._penance_heal.cast = self._consume_self(self._penance_heal.cast)
-        self._buff_effect = 1.5
-        self._reverse_buff_effect = 1/1.5
+        self._potds = disc.abilities['PotDS']
 
     def before_cast(self):
         pass
 
     def after_cast(self):
-        self.id = self.disc.apply_buff(self)
+        self.id = self.disc.apply_buff(self._potds)
         pass
-
-    def _on_apply(self):
-        self._penance.dmg_sp_coef *= self._buff_effect
-        self._penance.heal_sp_coef *= self._buff_effect
-
-    def _on_expire(self):
-        self._penance.dmg_sp_coef *= self._reverse_buff_effect
-        self._penance.heal_sp_coef *= self._reverse_buff_effect
 
 class PainfulPunishment(DiscTalentWrapper):
 
@@ -469,3 +457,50 @@ class HeavensWrath(DiscTalentWrapper):
     def before_cast(self):
         self._bolts_fired = self._penance.n_bolts
         pass
+
+class PowerOfTheDarkSide(DiscTalentWrapper):
+
+    def __init__(self, disc: Discipline):
+        super().__init__(name='PowerOfTheDarkSide', disc=disc, n_points=1, buff_duration=30)
+
+        self._penance = self.disc.abilities['penance']
+        self._penance_heal = self.disc.abilities['penance_heal']
+        self._penance.cast = self._consume_self(self._penance.cast)
+        self._penance_heal.cast = self._consume_self(self._penance_heal.cast)
+        self._ptw = self.disc.abilities['ptw']
+
+        self._buff_effect = 1.5
+        self._reverse_buff_effect = 1/self._buff_effect
+
+        self.disc.abilities['PotDS'] = self
+        self._proc_rate = 1 + self.disc.stat_effect("haste")
+
+        self._base_proc_th = np.random.gamma(60, 1)
+        self._proc_th = self._base_proc_th/self._proc_rate
+        self._time_from_last_proc = 60/self._proc_rate
+
+    def set_haste(self, haste_effect: float):
+        self._proc_rate = 1 + haste_effect
+        self._proc_th = self._base_proc_th / self._proc_rate
+
+    def progress_time(self, t: float):
+        super().progress_time(t)
+
+        if self._ptw.buff_active:
+            self._time_from_last_proc += t
+            if self._time_from_last_proc >= self._proc_th:
+                self._base_proc_th = np.random.gamma(60, 1)
+                self._proc_th = self._base_proc_th/self._proc_rate
+                self._time_from_last_proc = 0
+
+                self.disc.apply_buff(self)
+
+    def _on_apply(self):
+        if self.buff_active:
+            return
+        self._penance.dmg_sp_coef *= self._buff_effect
+        self._penance_heal.heal_sp_coef *= self._buff_effect
+
+    def _on_expire(self):
+        self._penance.dmg_sp_coef *= self._reverse_buff_effect
+        self._penance_heal.heal_sp_coef *= self._reverse_buff_effect

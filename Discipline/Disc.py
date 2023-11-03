@@ -163,6 +163,7 @@ class Discipline(Specialization):
         penance_heal = Penance(haste_effect=h, heal_sp_coef=1.287*1.5)
         penance = Penance(haste_effect=h, dmg_sp_coef=0.414*1.2*1.32/1.09, procs_atonement=True)
 
+
         # Smite
         smite = DiscAbility('smite', cast_time=GCD, haste_effect=h, dmg_sp_coef=0.55*1.2/1.09, procs_atonement=True, throughput_type=ThroughputType.LIGHT)
         smite_4p = DiscAbility('smite_4p', cast_time=0, gcd=0, dmg_sp_coef=0.55*1.15/1.09, procs_atonement=True, throughput_type=ThroughputType.SHADOW)
@@ -190,6 +191,7 @@ class Discipline(Specialization):
 
             self.abilities[ability.name] = ability
 
+        DiscTalents.PowerOfTheDarkSide(self)
 
         if self.talents["BT"] > 0:
             DiscTalents.BorrowedTime(self, pws, self.talents["BT"])
