@@ -195,6 +195,7 @@ class ShadowCovenant(DiscTalentWrapper):
         ability = disc.abilities['bender'] if bender_chosen else disc.abilities['sfiend']
         super().__init__(name='SC', disc=disc, n_points=1, ability=ability, gcd=0, buff_duration= 12 + 3*int(not bender_chosen))
 
+        self.disc.abilities[self.name] = self
         self.throughput_type = ThroughputType.SHADOW
         self._buff_effect = 1.20 + 0.15*int(not bender_chosen)
         self._reverse_buff_effect = 1./self._buff_effect
