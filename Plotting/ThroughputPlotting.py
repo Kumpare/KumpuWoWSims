@@ -45,10 +45,14 @@ def plot_throughputs(throughputs: Collection[ThroughputTracker], metric_to_track
         for t_stamp, _ in pwr_casts.items():
             pwr_handle = c_axis.scatter(t_stamp, c_max, c=col, marker='*', label='PW:R')
             ps_axis.scatter(t_stamp, ps_max, c=col, marker='*')
+            ps_axis.plot([t_stamp, t_stamp], [0,ps_max], c=col, linestyle='--')
+            c_axis.plot([t_stamp, t_stamp], [0,c_max], c=col, linestyle='--')
 
         for t_stamp, _ in eva_casts.items():
             eva_handle = c_axis.scatter(t_stamp, c_max, c=col, marker='v', label='Evangelism')
             ps_axis.scatter(t_stamp, ps_max, c=col, marker='v')
+            ps_axis.plot([t_stamp, t_stamp], [0, ps_max], c=col, linestyle=':')
+            c_axis.plot([t_stamp, t_stamp], [0, c_max], c=col, linestyle=':')
 
         handles = [hndl for hndl in [pwr_handle, eva_handle] if hndl is not None]
         ps_axis.legend(handles=handles, loc='upper left')
