@@ -286,6 +286,7 @@ class Discipline(Specialization):
         ability_to_cast = self.abilities[ability_name]
 
         if ability_to_cast.remaining_cooldown > 0 and ability_to_cast._charges == 0:
+            print(f'ability {ability_name} is still on cooldown for {ability_to_cast.remaining_cooldown} at time {self.time}')
             self.progress_time(ability_to_cast.remaining_cooldown)
 
         start_time = self.time

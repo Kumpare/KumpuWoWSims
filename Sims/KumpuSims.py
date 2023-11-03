@@ -71,6 +71,7 @@ def rad_1_ramp(disc: Discipline):
 
     pws_2_renews(disc)
     disc.cast("flash_heal")
+    disc.cast("pws")
     disc.cast("pwr")
 
 def rad_2_ramp(disc: Discipline):
@@ -120,7 +121,7 @@ def DiscSim_test(disc: Discipline, disc2: Discipline):
 
     plot_throughputs([disc, disc2])
 
-def sim_eva_rotation(discs: list):
+def sim_eva_into_up(discs: list):
 
     trackers = []
 
@@ -136,18 +137,116 @@ def sim_eva_rotation(discs: list):
         disc.cast("mind_blast")
         penance_4_smites(disc)
         penance_4_smites(disc)
-        penance_4_smites(disc)
         rad_1_ramp(disc)
+        disc.cast("mind_blast")
         disc.cast("up")
         penance_4_smites(disc)
-            #rad_2_ramp(disc)
+        penance_4_smites(disc)
 
         print(f'Radiance remaining cooldown and available charges:')
         print(disc.abilities['pwr'].remaining_cooldown, disc.abilities['pwr']._charges)
         print(f'Sfiend remaining cooldown and time from last cast: ')
         print(disc.abilities['sfiend'].remaining_cooldown, disc.time - prev_sfiend_cast)
+        print(f'Mind blast remaining cooldown: ')
+        print(disc.abilities['mind_blast'].remaining_cooldown)
 
     plot_throughputs(trackers)
+
+def taikki_8650_no_buffs(disc: Discipline):
+
+    tracker = ThroughputTracker(disc)
+
+    disc.cast("mind_blast")
+    disc.cast("ptw")
+    disc.cast("ptw")
+    disc.cast("pws")
+    disc.cast("flash_heal")
+    disc.cast("flash_heal")
+    disc.cast("pws")
+    disc.cast("renew")
+    disc.cast("renew")
+    disc.cast("renew")
+    disc.cast("flash_heal")
+    disc.cast("pws")
+    disc.cast("pwr")
+    disc.cast("pwr")
+    disc.cast("evangelism")
+    disc.cast("sfiend")
+    disc.cast("penance")
+    disc.cast("mind_blast")
+    disc.cast("swd")
+    disc.cast("smite")
+    disc.cast("smite")
+    disc.cast("smite")
+    penance_4_smites(disc)
+    penance_4_smites(disc)
+    disc.cast("penance")
+    disc.cast("mind_blast")
+    disc.cast("swd")
+    disc.cast("smite")
+    disc.cast("smite")
+    disc.cast("smite")
+    disc.cast("pws")
+    disc.cast("smite")
+    disc.cast("smite")
+    disc.cast("smite")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("flash_heal")
+    disc.cast("pws_rapture")
+    disc.cast("pwr")
+    disc.cast("pwr")
+    disc.cast("sfiend")
+    disc.cast("penance")
+    disc.cast("mind_blast")
+    disc.cast("swd")
+    disc.cast("smite")
+    disc.cast("smite")
+    disc.cast("smite")
+    penance_4_smites(disc)
+    penance_4_smites(disc)
+    disc.cast("penance")
+    disc.cast("smite")
+    disc.cast("mind_blast")
+    disc.cast("smite")
+    disc.cast("smite")
+    disc.cast("smite")
+    disc.cast("pws")
+    disc.cast("smite")
+    disc.cast("smite")
+    disc.cast("flash_heal")
+    disc.cast("pws")
+    disc.cast("flash_heal")
+    disc.cast("renew")
+    disc.cast("pws")
+    disc.cast("renew")
+    disc.cast("flash_heal")
+    disc.cast("pws")
+    disc.cast("pwr")
+    disc.cast("pwr")
+    disc.cast("sfiend")
+    disc.cast("penance")
+    disc.cast("mind_blast")
+    disc.cast("swd")
+    disc.cast("smite")
+    disc.cast("smite")
+    disc.cast("smite")
+    penance_4_smites(disc)
+    penance_4_smites(disc)
+    disc.cast("penance")
+    disc.cast("smite")
+    disc.cast("mind_blast")
+    disc.cast("smite")
+    disc.cast("smite")
+    disc.cast("smite")
+    disc.cast("smite")
+
+    plot_throughputs([tracker])
+
 
 talents1 = {
     "Schism": 1,
@@ -172,15 +271,37 @@ talents1 = {
     'ED': 1,
     'UW': 2
 }
-stats1 = Stats(main=13000, crit=5400, haste=7000, mast=1780, vers=1780)
+talents_taikki1 = {
+"Schism": 1,
+    "PP": 1,
+    "DI": 1,
+    "DA": 1,
+    "SC": 1,
+    "VS": 1,
+    "Castigation": 1,
+    "Bender": 0,
+    "HD": 2,
+    "BoL": 2,
+    "IT": 1,
+    "AR": 2,
+    "BT": 2,
+    "Evangelism": 1,
+    "Indemnity": 1,
+    "ToT": 1,
+    "WotP": 1,
+    'ED': 1,
+    'UW': 2
+}
+stats1 = Stats(main=13000, crit=5400, haste=5400, mast=1780, vers=1780)
 disc1 = Discipline(talents1, stats1)
 
 stats2 = Stats(main=13000, crit=4000, haste=8000, mast=1560, vers=800)
 disc2 = Discipline(talents1, stats2)
 
 stats3 = Stats(main=13000, crit=4000, haste=8560, mast=1000, vers=800)
-disc3 = Discipline(talents1, stats3)
-sim_eva_rotation([disc1, disc2, disc3])
+disc3 = Discipline(talents_taikki1, stats3)
+#sim_eva_into_up([disc1, disc2, disc3])
+taikki_8650_no_buffs(disc3)
 
 
 

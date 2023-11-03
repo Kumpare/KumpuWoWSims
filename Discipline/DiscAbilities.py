@@ -53,7 +53,8 @@ class DiscHasteBuff(Buff):
         self._reverse_buff_effect = 1/self._buff_effect
 
     def _on_apply(self):
-        self.disc.increase_haste(self._buff_effect)
+        if not self.buff_active:
+            self.disc.increase_haste(self._buff_effect)
 
     def _on_expire(self):
         self.disc.increase_haste(self._reverse_buff_effect)

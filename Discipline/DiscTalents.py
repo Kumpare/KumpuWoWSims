@@ -82,7 +82,8 @@ class BorrowedTime(DiscTalentWrapper):
         pass
 
     def _on_apply(self):
-        self.disc.increase_haste(self.haste_effect)
+        if not self.buff_active:
+            self.disc.increase_haste(self.haste_effect)
 
     def _on_expire(self):
         self.disc.increase_haste(1./self.haste_effect)
