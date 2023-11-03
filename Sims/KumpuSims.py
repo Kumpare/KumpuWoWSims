@@ -171,6 +171,7 @@ def taikki_8650_no_buffs(disc: Discipline):
     disc.cast("pwr")
     disc.cast("pwr")
     disc.cast("evangelism")
+    sfiend1_time = disc.time
     disc.cast("sfiend")
     disc.cast("penance")
     disc.cast("mind_blast")
@@ -186,10 +187,10 @@ def taikki_8650_no_buffs(disc: Discipline):
     disc.cast("smite")
     disc.cast("smite")
     disc.cast("smite")
-    disc.cast("penance")
     disc.cast("smite")
     disc.cast("smite")
     disc.cast("smite")
+    disc.cast("pws_rapture")
     disc.cast("pws_rapture")
     disc.cast("pws_rapture")
     disc.cast("pws_rapture")
@@ -200,6 +201,8 @@ def taikki_8650_no_buffs(disc: Discipline):
     disc.cast("pws_rapture")
     disc.cast("pwr")
     disc.cast("pwr")
+    sfiend2_time = disc.time
+    print(f'{sfiend1_time}, {sfiend2_time}, {sfiend2_time - sfiend1_time}')
     disc.cast("sfiend")
     disc.cast("penance")
     disc.cast("mind_blast")

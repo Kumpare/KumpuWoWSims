@@ -104,7 +104,7 @@ class Buff(Ability):
         self._on_apply()
         self.time_applied = time_applied
         self._remaining_duration = np.minimum(self._buff_duration*1.3, self._buff_duration + self._remaining_duration)
-        self._stacks = min(self._stacks + n_stacks, self._max_stacks)
+        self._stacks = np.minimum(self._stacks + n_stacks, self._max_stacks)
 
     @property
     def buff_active(self):
@@ -113,6 +113,7 @@ class Buff(Ability):
     @property
     def duration(self):
         return self._buff_duration
+
     @property
     def remaining_duration(self):
         return self._remaining_duration

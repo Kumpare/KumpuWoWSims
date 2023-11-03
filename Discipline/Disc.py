@@ -266,14 +266,20 @@ class Discipline(Specialization):
             sfiend.heal_sp_coef = 1.8*15
 
         if self.talents['UW'] > 0:
-            smite._cast_time /= 1 + 0.05*self.talents['UW']
-            smite._base_gcd /= 1 + 0.05*self.talents['UW']
+            uw_effect = 1 + 0.05*self.talents['UW']
+            smite._base_cast_time /= uw_effect
+            smite._cast_time /= uw_effect
+            smite._base_gcd /= uw_effect
+            smite._gcd /= uw_effect
+            flash_heal._base_cast_time /= uw_effect
+            flash_heal._cast_time /= uw_effect
+            flash_heal._gcd /= uw_effect
 
     def set_haste(self):
         haste_effect = self.stat_effect("haste")
         self.gcd = gcd_from_haste(haste_effect)
         self.half_gcd = self.gcd/2
-        self.radiance_cast = 2 / haste_effect
+        self.radiance_cast = np.maximum(2 / haste_effect, self.gcd)
         for ability in self.abilities.values():
             ability.set_haste(haste_effect)
         pass
@@ -380,7 +386,7 @@ class Discipline(Specialization):
     def refresh_buff(self, buff_id: int):
         buff = self._active_buffs[buff_id]
         buff.refresh_duration()
-        self.active_buffs.loc[self.active_buffs['ID'] == buff_id]['Expiration time'] = self.time + buff.remaining_duration
+        self.active_buffs.loc[self.active_buffs['ID'] == buff_id, 'Expiration time'] = self.time + buff.remaining_duration
         pass
 
     def extend_buff(self, buff: Buff, t_amount: float):
@@ -427,7 +433,7 @@ class Discipline(Specialization):
     def find_buff_id(self, buff:Buff):
 
         for id, b in self._active_buffs.items():
-            if type(b) == type(buff):
+            if b.name == buff.name:
                 return id
         return None
 

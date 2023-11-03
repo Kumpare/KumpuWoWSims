@@ -473,14 +473,14 @@ class PowerOfTheDarkSide(DiscTalentWrapper):
         self._reverse_buff_effect = 1/self._buff_effect
 
         self.disc.abilities['PotDS'] = self
-        self._proc_rate = 1 + self.disc.stat_effect("haste")
+        self._proc_rate = self.disc.stat_effect("haste")
 
         self._base_proc_th = np.random.gamma(60, 1)
         self._proc_th = self._base_proc_th/self._proc_rate
         self._time_from_last_proc = 60/self._proc_rate
 
     def set_haste(self, haste_effect: float):
-        self._proc_rate = 1 + haste_effect
+        self._proc_rate = haste_effect
         self._proc_th = self._base_proc_th / self._proc_rate
 
     def progress_time(self, t: float):
