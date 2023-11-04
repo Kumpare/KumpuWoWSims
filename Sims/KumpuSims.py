@@ -354,6 +354,46 @@ def forced_30s_ramp(disc: Discipline):
 
     return tracker
 
+def start_new_ramp_when_sfiend_and_2_rads_ready(disc: Discipline):
+
+    tracker = ThroughputTracker(disc)
+    sfiend = disc.abilities["sfiend"]
+    pwr = disc.abilities["pwr"]
+    penance = disc.abilities["penance"]
+
+    disc.cast("ptw")
+    disc.cast("ptw")
+    evangelism_ramp(disc)
+    disc.cast("sfiend")
+    disc.cast("mind_blast")
+
+    while (1 - pwr._charges)*15 + pwr.remaining_cooldown > 10 or sfiend.remaining_cooldown > 10:
+        if penance.remaining_cooldown > 0:
+            disc.cast("smite")
+        else:
+            disc.cast("penance")
+
+    disc.cast("ptw")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("flash_heal")
+    disc.cast("pws_rapture")
+    disc.cast("pwr")
+    disc.cast("pwr")
+    disc.cast("sfiend")
+    disc.cast("mind_blast")
+
+    while (1 - pwr._charges)*15 + pwr.remaining_cooldown > 10 or sfiend.remaining_cooldown > 10:
+        if penance.remaining_cooldown > 0.1:
+            disc.cast("smite")
+        else:
+            disc.cast("penance")
+
+    return tracker
 
 talents1 = {
     "Schism": 1,
@@ -412,11 +452,13 @@ disc1_taikki = Discipline(talents_taikki1, stats1)
 #tracker1 = forced_30s_ramp(disc1)
 #tracker3 = forced_30s_ramp(disc3)
 #sim_eva_into_up([disc1, disc2, disc3])
-tracker3_taikki = taikki_8650_no_buffs(disc3_taikki)
+#tracker3_taikki = taikki_8650_no_buffs(disc3_taikki)
 #tracker1_taikki = taikki_8650_no_buffs(disc1_taikki)
 #tracker3 = eva_mini_rapture_mini(disc3, extra_casts=True)
-tracker1 = eva_mini_rapture_mini(disc1)
-plot_throughputs([tracker1, tracker3_taikki], labels=['Norm haste, \nEva-mini-rapture-mini', 'High haste, \nEva-rapture-doublerad'])
+#tracker1 = eva_mini_rapture_mini(disc1)
+tracker1 = start_new_ramp_when_sfiend_and_2_rads_ready(disc1)
+tracker3 = start_new_ramp_when_sfiend_and_2_rads_ready(disc3)
+plot_throughputs([tracker1, tracker3], labels=['Norm haste, \nForced sfiend double rad', 'High haste, \nForced sfiend double rad'])
 
 
 
