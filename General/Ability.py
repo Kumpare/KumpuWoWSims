@@ -22,6 +22,9 @@ class Ability:
         self.name = name
         self.cast = self.base_cast
 
+    def __repr__(self):
+        return self.name
+
     def base_cast(self, cast_start_time: float):
         if self.remaining_cooldown > 0 and self._charges == 0:
             raise ValueError(f'Ability {self.name} is still on cooldown')
@@ -59,7 +62,7 @@ class Ability:
             return
 
         self._remaining_cooldown -= t
-        if self._remaining_cooldown < 0:
+        if self._remaining_cooldown <= 0:
             self._charges += 1
             self._remaining_cooldown = self.cooldown + self.remaining_cooldown if self._charges < self._max_charges else 0
 
@@ -185,11 +188,14 @@ class TickingBuff(Buff):
 
     def apply(self, time_applied: float, n_stacks: int=1):
         super().apply(time_applied, n_stacks)
-        self._time_from_last_tick = 0
 
     @property
     def tick_rate(self):
         return self._tick_rate
+
+    def expire(self):
+        super().expire()
+        self._time_from_last_tick = 0
 
 
 class AbilityEvent:

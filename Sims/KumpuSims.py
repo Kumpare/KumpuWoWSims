@@ -175,7 +175,7 @@ def taikki_8650_no_buffs(disc: Discipline):
     disc.cast("sfiend")
     disc.cast("penance")
     disc.cast("mind_blast")
-    disc.cast("swd")
+    disc.cast("smite")
     disc.cast("smite")
     disc.cast("smite")
     disc.cast("smite")
@@ -183,13 +183,13 @@ def taikki_8650_no_buffs(disc: Discipline):
     penance_4_smites(disc)
     disc.cast("penance")
     disc.cast("mind_blast")
-    disc.cast("swd")
     disc.cast("smite")
     disc.cast("smite")
     disc.cast("smite")
     disc.cast("smite")
     disc.cast("smite")
     disc.cast("smite")
+    disc.cast("ptw")
     disc.cast("pws_rapture")
     disc.cast("pws_rapture")
     disc.cast("pws_rapture")
@@ -202,7 +202,6 @@ def taikki_8650_no_buffs(disc: Discipline):
     disc.cast("pwr")
     disc.cast("pwr")
     sfiend2_time = disc.time
-    print(f'{sfiend1_time}, {sfiend2_time}, {sfiend2_time - sfiend1_time}')
     disc.cast("sfiend")
     disc.cast("penance")
     disc.cast("mind_blast")
@@ -248,8 +247,112 @@ def taikki_8650_no_buffs(disc: Discipline):
     disc.cast("smite")
     disc.cast("smite")
 
-    plot_throughputs([tracker])
+    return tracker
 
+def eva_mini_rapture_mini(disc: Discipline, extra_casts: bool=False):
+
+    tracker = ThroughputTracker(disc)
+
+    disc.cast("ptw")
+    disc.cast("ptw")
+    evangelism_ramp(disc)
+    disc.cast("sfiend")
+    disc.cast("mind_blast")
+    penance_4_smites(disc)
+    penance_4_smites(disc)
+    penance_4_smites(disc)
+    rad_1_ramp(disc)
+    disc.cast("mind_blast")
+    penance_4_smites(disc)
+    if extra_casts:
+        disc.cast("penance")
+        disc.cast("smite")
+    disc.cast("smite")
+    disc.cast("ptw")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("flash_heal")
+    disc.cast("pwr")
+    disc.cast("pwr")
+    disc.cast("sfiend")
+    disc.cast("mind_blast")
+    penance_4_smites(disc)
+    penance_4_smites(disc)
+    penance_4_smites(disc)
+    rad_1_ramp(disc)
+    disc.cast("mind_blast")
+    penance_4_smites(disc)
+    disc.cast("smite")
+
+    return tracker
+
+def forced_30s_ramp(disc: Discipline):
+
+    tracker = ThroughputTracker(disc)
+    pwr = disc.abilities["pwr"]
+    penance = disc.abilities["penance"]
+    pet_name = "sfiend" if disc.talents['Bender'] == 0 else 'bender'
+    pet = disc.abilities[pet_name]
+    disc.cast("ptw")
+    disc.cast("ptw")
+    evangelism_ramp(disc)
+    gcd = disc.gcd
+    rad_cast = disc.radiance_cast
+    ramp_time = 2*rad_cast + 10*gcd
+    disc.cast(pet_name)
+    disc.cast("mind_blast")
+
+    while (1 - pwr._charges)*15 + pwr.remaining_cooldown > ramp_time:
+        if penance.remaining_cooldown > 0:
+            disc.cast("smite")
+        else:
+            disc.cast("penance")
+    disc.cast("smite")
+    disc.cast("smite")
+    disc.cast("ptw")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("pws_rapture")
+    disc.cast("flash_heal")
+    disc.cast("pws_rapture")
+    disc.cast("pwr")
+    disc.cast("pwr")
+    if pet.remaining_cooldown <= 0:
+        disc.cast(pet_name)
+    disc.cast("mind_blast")
+    print(pwr.remaining_cooldown, pwr._charges)
+    print(pet.remaining_cooldown)
+
+    while (1 - pwr._charges)*15 + pwr.remaining_cooldown > ramp_time:
+        if penance.remaining_cooldown > 0:
+            disc.cast("smite")
+        else:
+            disc.cast("penance")
+
+    disc.cast("smite")
+    disc.cast("smite")
+    disc.cast("ptw")
+    pws_3_renews(disc)
+    rad_2_ramp(disc)
+    disc.cast(pet_name)
+    disc.cast("mind_blast")
+
+    while (1 - pwr._charges)*15 + pwr.remaining_cooldown > ramp_time:
+        if penance.remaining_cooldown > 0:
+            disc.cast("smite")
+        else:
+            disc.cast("penance")
+
+    return tracker
 
 talents1 = {
     "Schism": 1,
@@ -296,16 +399,23 @@ talents_taikki1 = {
     'UW': 2
 }
 stats1 = Stats(main=13000, crit=5400, haste=5400, mast=1780, vers=1780)
-disc1 = Discipline(talents1, stats1)
+disc1 = Discipline(talents_taikki1, stats1)
 
 stats2 = Stats(main=13000, crit=4000, haste=8000, mast=1560, vers=800)
 disc2 = Discipline(talents1, stats2)
 
 stats3 = Stats(main=13000, crit=4000, haste=8560, mast=1000, vers=800)
 disc3 = Discipline(talents_taikki1, stats3)
+disc3_taikki = Discipline(talents_taikki1, stats3)
+disc1_taikki = Discipline(talents_taikki1, stats1)
+tracker1 = forced_30s_ramp(disc1)
+tracker3 = forced_30s_ramp(disc3)
 #sim_eva_into_up([disc1, disc2, disc3])
-taikki_8650_no_buffs(disc3)
-
+#tracker3_taikki = taikki_8650_no_buffs(disc3_taikki)
+#tracker1_taikki = taikki_8650_no_buffs(disc1_taikki)
+#tracker3 = eva_mini_rapture_mini(disc3, extra_casts=True)
+#tracker1 = eva_mini_rapture_mini(disc1)
+plot_throughputs([tracker1, tracker3])
 
 
 

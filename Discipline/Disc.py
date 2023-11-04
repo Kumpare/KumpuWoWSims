@@ -107,8 +107,11 @@ class Discipline(Specialization):
         self.time += amount
         self.active_atonements.progress_time(amount)
 
+        tick_abilities = []
         for ability in self.abilities.values():
-            ability.progress_time(amount)
+            n_ticks = ability.progress_time(amount)
+            if isinstance(ability, DiscTickingBuff) and n_ticks > 0:
+                tick_abilities.append(ability)
 
         #remove expiring buffs
         expiring_buff_mask = self.active_buffs['Expiration time'] <= self.time
@@ -121,12 +124,11 @@ class Discipline(Specialization):
         self.active_buffs = self.active_buffs.loc[~expiring_buff_mask, :]
 
         #update next ticks
-        tick_update_mask = self.active_buffs['Next tick'] <= self.time
-        tick_ids = self.active_buffs.loc[tick_update_mask, 'ID']
-        for ind, tick_id in tick_ids.items():
-            ability = self._active_buffs[tick_id]
-            assert isinstance(ability, DiscTickingBuff)
-            self.active_buffs.at[ind, 'Next tick'] = self.time + ability.time_until_next_tick +int(ability.time_until_next_tick < 1e-3)*ability._tick_rate
+        for tick_ability in tick_abilities:
+            if not tick_ability.buff_active:
+                continue
+            tick_id = self.find_buff_id(tick_ability)
+            self.active_buffs.at[tick_id, 'Next tick'] = self.time + tick_ability.time_until_next_tick
         pass
 
     def stat_to_percent(self, stat: str):
@@ -180,7 +182,7 @@ class Discipline(Specialization):
         ptw = DiscTickingBuff('ptw', haste_effect=h, buff_duration=20, sp_coef=1.69/1.09*1.05, tick_rate=2, procs_atonement=True)
 
         halo = DiscAbility('halo', cooldown=45, haste_effect=h, dmg_sp_coef=1, heal_sp_coef=1, procs_atonement=True, throughput_type=ThroughputType.LIGHT)
-        evangelism = DiscAbility('evangelism', cooldown=90, haste_effect=h, gcd=HALF_GCD)
+        evangelism = DiscAbility('evangelism', cooldown=90, haste_effect=h)
         pi = DiscHasteBuff('pi', self, cooldown=120, buff_effect=1.2, buff_duration=15)
         lust = DiscHasteBuff('lust', self, cooldown=600, buff_effect=1.3, buff_duration=40)
 
@@ -294,7 +296,8 @@ class Discipline(Specialization):
         ability_to_cast = self.abilities[ability_name]
 
         if ability_to_cast.remaining_cooldown > 0 and ability_to_cast._charges == 0:
-            print(f'ability {ability_name} is still on cooldown for {ability_to_cast.remaining_cooldown} at time {self.time}')
+            if ability_to_cast.remaining_cooldown > self.gcd/3:
+                print(f'ability {ability_name} is still on cooldown for {ability_to_cast.remaining_cooldown} at time {self.time}')
             self.progress_time(ability_to_cast.remaining_cooldown)
 
         start_time = self.time
@@ -340,6 +343,9 @@ class Discipline(Specialization):
         if self.active_buffs.size <= 0:
             return None, None
         min_event_times = self.active_buffs.loc[:, ['Next tick', 'Expiration time']].min(axis=1)
+        min_event_times = min_event_times.loc[(min_event_times - self.time) > self._server_tick_rate]
+        if min_event_times.size == 0:
+            return None, None
         next_event_time_ind = min_event_times.idxmin()
         next_event_time = min_event_times.loc[next_event_time_ind]
         event_ind = self.active_buffs.at[next_event_time_ind, 'ID']

@@ -13,6 +13,7 @@ class Specialization:
             'vers': 1.03,
             'mast': 1,
         }
+        self._server_tick_rate = 1/30
 
     @staticmethod
     def globals_in_time_window(t_window: float, haste: Union[int, float],
