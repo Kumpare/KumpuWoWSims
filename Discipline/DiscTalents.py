@@ -476,32 +476,35 @@ class PowerOfTheDarkSide(DiscTalentWrapper):
         self.disc.abilities['PotDS'] = self
         self._proc_rate = self.disc.stat_effect("haste")
 
-        self._base_proc_th = np.random.gamma(60, 1)
-        self._proc_th = self._base_proc_th/self._proc_rate
-        self._time_from_last_proc = 60/self._proc_rate
+        self._procs = np.random.rand(120,)
+        self._proc_th = 1 - self._proc_rate/60
+        self._prog_progress = 0
+        self._prev_prog_ind = -1
 
     def set_haste(self, haste_effect: float):
         self._proc_rate = haste_effect
-        self._proc_th = self._base_proc_th / self._proc_rate
+        self._proc_th = 1 - self._proc_rate/60
 
     def progress_time(self, t: float):
         super().progress_time(t)
 
         if self._ptw.buff_active:
-            self._time_from_last_proc += t
-            if self._time_from_last_proc >= self._proc_th:
-                self._base_proc_th = np.random.gamma(60, 1)
-                self._proc_th = self._base_proc_th/self._proc_rate
-                self._time_from_last_proc = 0
-
+            self._prog_progress += t
+            ind = self._prog_progress_int % self._procs.shape[0]
+            if self._prev_prog_ind == ind:
+                return
+            self._prev_prog_ind = ind
+            if self._proc_th <= self._procs[ind]:
                 self.disc.apply_buff(self)
 
     def _on_apply(self):
-        if self.buff_active:
-            return
         self._penance.dmg_sp_coef *= self._buff_effect
         self._penance_heal.heal_sp_coef *= self._buff_effect
 
     def _on_expire(self):
         self._penance.dmg_sp_coef *= self._reverse_buff_effect
         self._penance_heal.heal_sp_coef *= self._reverse_buff_effect
+
+    @property
+    def _prog_progress_int(self):
+        return int(self._prog_progress)

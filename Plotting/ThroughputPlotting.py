@@ -22,6 +22,7 @@ def plot_throughputs(throughputs: Collection[ThroughputTracker], metric_to_track
     radius = 2.5
     ps_axis.set_title(f'Hps calculated based on healing done \n over {radius*2:.1f} second period')
 
+    lbl_handles = []
     for i, throughput in enumerate(throughputs):
         data = throughput.data.loc[metric_to_track, :]
         data = data.sort_values(key=lambda x: x.index)
@@ -32,6 +33,7 @@ def plot_throughputs(throughputs: Collection[ThroughputTracker], metric_to_track
         lbl = labels[i] if labels is not None else str(i)
         p = ps_axis.plot(ps_data.index, ps_data)[0]
         p.set_label(lbl)
+        lbl_handles.append(p)
 
         c_axis.plot(c_data.index, c_data)
         pwr_casts = throughput.cast_abilities.loc[throughput.cast_abilities == 'pwr']
@@ -57,6 +59,8 @@ def plot_throughputs(throughputs: Collection[ThroughputTracker], metric_to_track
         handles = [hndl for hndl in [pwr_handle, eva_handle] if hndl is not None]
         ps_axis.legend(handles=handles, loc='upper left')
 
+    if labels is not None:
+        c_axis.legend(handles=lbl_handles, loc='upper left')
     plt.show()
     plt.clf()
 
