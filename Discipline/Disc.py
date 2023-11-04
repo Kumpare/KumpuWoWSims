@@ -313,14 +313,14 @@ class Discipline(Specialization):
         if isinstance(ability_to_cast, Buff):
             self.apply_buff(ability_to_cast)
 
-        self.calculate_throughput(next_event)
-
         if isinstance(ability_to_cast, DiscAbility):
             if ability_to_cast.n_atonements_applied > 0:
                 self.active_atonements.add_atonement(ability_to_cast.n_atonements_applied,
                                                      duration=ability_to_cast.atonement_duration + ability_to_cast.cast_time)
                 if ability_name == "flash_heal":
                     self.active_atonements.add_atonement(1, duration=ability_to_cast.atonement_duration + ability_to_cast.cast_time, player_ind=19)
+
+        self.calculate_throughput(next_event)
 
         looped_events2 = self.loop_through_events_until(end_time)
         to_return.extend(looped_events2)
@@ -356,7 +356,7 @@ class Discipline(Specialization):
 
     def calculate_throughput(self, ability_event: DiscAbilityEvent):
         crit_effect = self.stat_effect("crit")
-        crit_effect = crit_effect + (crit_effect - 1)*(1.2 if "DA" in self.talents else 1)
+        crit_effect = 1 + (crit_effect - 1)*(1.2 if "DA" in self.talents else 1)
         vers_effect = self.stat_effect("vers")
         throughput_type_effect_heal, throughput_type_effect_dmg = self.get_throughput_type_effect(ability_event.throughput_type)
         ability_event.dmg *= self.stats.main*crit_effect*vers_effect*throughput_type_effect_dmg

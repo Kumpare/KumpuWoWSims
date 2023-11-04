@@ -454,7 +454,6 @@ class HeavensWrath(DiscTalentWrapper):
         self._up.progress_time(self._bolts_fired*self._cdr_reduction_per_bolt)
         pass
 
-
     def before_cast(self):
         self._bolts_fired = self._penance.n_bolts
         pass
