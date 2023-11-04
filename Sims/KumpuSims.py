@@ -354,6 +354,7 @@ def forced_30s_ramp(disc: Discipline):
 
     return tracker
 
+
 talents1 = {
     "Schism": 1,
     "PP": 1,

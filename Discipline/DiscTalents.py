@@ -367,6 +367,7 @@ class WordsOfThePious(DiscTalentWrapper):
         self.disc.apply_buff(self)
 
     def _on_apply(self):
+
         self._smite.dmg_sp_coef *= self._buff_effect
         self._smite_4p.dmg_sp_coef *= self._buff_effect
 

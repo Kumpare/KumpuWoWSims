@@ -134,7 +134,9 @@ class Discipline(Specialization):
     def stat_to_percent(self, stat: str):
         to_return = super().stat_to_percent(stat)
         m = 1. if stat.lower() != 'mast' else 1.15
-        return to_return * m
+        to_return *= m
+        to_return += 0.108 if stat.lower() == 'mast' else 0
+        return to_return
 
     def stat_effect(self, stat: str):
         to_return = (1 + self.stat_to_percent(stat))*self.stat_increases[stat]

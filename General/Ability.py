@@ -104,7 +104,8 @@ class Buff(Ability):
                 self._stacks = 0
 
     def apply(self, time_applied: float, n_stacks: int = 1):
-        self._on_apply()
+        if not self.buff_active:
+            self._on_apply()
         self.time_applied = time_applied
         self._remaining_duration = np.minimum(self._buff_duration*1.3, self._buff_duration + self._remaining_duration)
         self._stacks = np.minimum(self._stacks + n_stacks, self._max_stacks)
