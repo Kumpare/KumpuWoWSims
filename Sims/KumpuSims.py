@@ -253,42 +253,130 @@ def eva_mini_rapture_mini(disc: Discipline, extra_casts: bool=False):
 
     tracker = ThroughputTracker(disc)
 
+    pwr = disc.abilities["pwr"]
+    scov = disc._buffs["SC"]
+    penance = disc.abilities["penance"]
+    mind_blast = disc.abilities["mind_blast"]
+    pet_name = "sfiend" if disc.talents['Bender'] == 0 else 'bender'
+    pet = disc.abilities[pet_name]
+    potds = disc.abilities["PotDS"]
+
     disc.cast("ptw")
     disc.cast("ptw")
     evangelism_ramp(disc)
-    disc.cast("sfiend")
-    disc.cast("mind_blast")
-    penance_4_smites(disc)
-    penance_4_smites(disc)
-    penance_4_smites(disc)
-    rad_1_ramp(disc)
-    disc.cast("mind_blast")
-    penance_4_smites(disc)
-    if extra_casts:
-        disc.cast("penance")
-        disc.cast("smite")
-    disc.cast("smite")
-    disc.cast("ptw")
-    disc.cast("pws_rapture")
-    disc.cast("pws_rapture")
-    disc.cast("pws_rapture")
-    disc.cast("pws_rapture")
-    disc.cast("pws_rapture")
-    disc.cast("pws_rapture")
-    disc.cast("pws_rapture")
-    disc.cast("flash_heal")
-    disc.cast("pwr")
-    disc.cast("pwr")
-    disc.cast("sfiend")
-    disc.cast("mind_blast")
-    penance_4_smites(disc)
-    penance_4_smites(disc)
-    penance_4_smites(disc)
-    rad_1_ramp(disc)
-    disc.cast("mind_blast")
-    penance_4_smites(disc)
-    disc.cast("smite")
+    disc.cast(pet_name)
 
+    disc.cast("mind_blast")
+    penance_4_smites(disc)
+    penance_4_smites(disc)
+
+    mini_ramp_time = 5*disc.gcd + disc.radiance_cast
+    mini_ramp_time /= (1 + 0.04*disc.talents["BT"])
+    time_until_ramp_ready = max((0 -pwr._charges)*15 + pwr.remaining_cooldown, pet.remaining_cooldown*disc.talents["Bender"])
+    while time_until_ramp_ready > mini_ramp_time or scov.buff_active:
+        if mind_blast.remaining_cooldown > 0:
+            disc.cast("smite")
+        else:
+            disc.cast("mind_blast")
+
+        time_until_ramp_ready = max((1 - pwr._charges)*15 + pwr.remaining_cooldown, pet.remaining_cooldown*disc.talents["Bender"])
+
+    rad_1_ramp(disc)
+    if pet.remaining_cooldown <= 0:
+        disc.cast(pet_name)
+
+    if potds.buff_active:
+        disc.cast("penance")
+        if mind_blast.remaining_cooldown <= 0:
+            disc.cast("mind_blast")
+    else:
+        if mind_blast.remaining_cooldown <= 0:
+            disc.cast("mind_blast")
+        disc.cast("penance")
+
+    for _ in range(4):
+        disc.cast("smite")
+
+    if penance.remaining_cooldown <= 0:
+        disc.cast("penance")
+
+    rapture_ramp_time = 7*disc.gcd + disc.radiance_cast
+    rapture_ramp_time /= 1 + 0.04*disc.talents["BT"]
+
+    time_until_ramp_ready = max((1 -pwr._charges)*15 + pwr.remaining_cooldown, pet.remaining_cooldown)
+
+    while time_until_ramp_ready > rapture_ramp_time:
+
+        if mind_blast.remaining_cooldown > 0:
+            disc.cast("smite")
+        else:
+            disc.cast("mind_blast")
+
+
+        time_until_ramp_ready = max((1 -pwr._charges)*15 + pwr.remaining_cooldown, pet.remaining_cooldown)
+
+    disc.cast("ptw")
+    for _ in range(5):
+        disc.cast("pws_rapture")
+    disc.cast("flash_heal")
+    disc.cast("pws_rapture")
+    disc.cast("pwr")
+    disc.cast("pwr")
+    disc.cast(pet_name)
+
+    if potds.buff_active:
+        disc.cast("penance")
+        if mind_blast.remaining_cooldown <= 0:
+            disc.cast("mind_blast")
+    else:
+        if mind_blast.remaining_cooldown <= 0:
+            disc.cast("mind_blast")
+        disc.cast("penance")
+
+    time_until_ramp_ready = max((0 - pwr._charges) * 15 + pwr.remaining_cooldown, pet.remaining_cooldown * disc.talents["Bender"])
+    while time_until_ramp_ready > mini_ramp_time or scov.buff_active:
+        if mind_blast.remaining_cooldown > 0:
+            disc.cast("smite")
+        else:
+            disc.cast("mind_blast")
+
+        time_until_ramp_ready = max((1 - pwr._charges) * 15 + pwr.remaining_cooldown, pet.remaining_cooldown * disc.talents["Bender"])
+
+    rad_1_ramp(disc)
+    if pet.remaining_cooldown <= 0:
+        disc.cast(pet_name)
+
+    if potds.buff_active:
+        disc.cast("penance")
+        if mind_blast.remaining_cooldown <= 0:
+            disc.cast("mind_blast")
+    else:
+        if mind_blast.remaining_cooldown <= 0:
+            disc.cast("mind_blast")
+        disc.cast("penance")
+
+    for _ in range(4):
+        disc.cast("smite")
+
+    evangelism_ramp_time = 9 * disc.gcd + disc.radiance_cast
+    evangelism_ramp_time /= 1 + 0.04 * disc.talents["BT"]
+
+    time_until_ramp_ready = max((1 - pwr._charges) * 15 + pwr.remaining_cooldown, pet.remaining_cooldown)
+
+    while time_until_ramp_ready > evangelism_ramp_time:
+
+        if mind_blast.remaining_cooldown > 0:
+            disc.cast("smite")
+        else:
+            disc.cast("mind_blast")
+
+        time_until_ramp_ready = max((1 - pwr._charges) * 15 + pwr.remaining_cooldown, pet.remaining_cooldown)
+
+    print('#####################################')
+    print(f'Remaining pet cooldown: {pet.remaining_cooldown}')
+    print(f'PWR charges and cd: {pwr._charges, pwr.remaining_cooldown}')
+    print(f'Mind blast cd: {mind_blast.remaining_cooldown}')
+    print(f'Scov remaining duration: {scov.remaining_duration}')
     return tracker
 
 def forced_30s_ramp(disc: Discipline):
@@ -523,74 +611,84 @@ def sfiend_2_rads(disc: Discipline):
 
 
 
-talents1 = {
+talents_bender = {
+    "WotP": 1,
+    'UW': 2,
+    'ED': 1,
     "Schism": 1,
     "PP": 1,
     "DI": 1,
     "SC": 1,
-    "VS": 1,
     "Castigation": 1,
-    "Bender": 0,
-    "HD": 1,
-    "BoL": 2,
-    "IT": 1,
     "AR": 2,
-    "BT": 2,
-    "Evangelism": 1,
+    "BT": 0,
     "Indemnity": 1,
+
+    # tot
     "ToT": 1,
-    "WotP": 1,
-    "TE": 0,
-    'HW': 2,
-    'OwL': 1,
-    'ED': 1,
-    'UW': 2,
-    'DA': 1
+    'DA': 1,
+    "BoL": 2,
+
+    #up
+    'HW': 0,
+    'OwL': 0,
+
+    #vs
+    "VS": 1,
+    "IT": 1,
+    "Bender": 1,
+
+    #eva
+    "Evangelism": 1,
+    "HD": 2,
+    "TE": 0
 }
-talents_taikki1 = {
-"Schism": 1,
+
+talents_sfiend = {
+    "WotP": 1,
+    'UW': 2,
+    'ED': 1,
+    "Schism": 1,
     "PP": 1,
     "DI": 1,
-    "DA": 1,
     "SC": 1,
-    "VS": 1,
     "Castigation": 1,
-    "Bender": 0,
-    "HD": 2,
-    "BoL": 2,
-    "IT": 1,
     "AR": 2,
     "BT": 2,
-    "Evangelism": 1,
     "Indemnity": 1,
-    "ToT": 1,
-    "WotP": 1,
-    'ED': 1,
-    'UW': 2
-}
-stats1 = Stats(main=13000, crit=5400, haste=5400, mast=1780, vers=1780)
-disc1 = Discipline(talents_taikki1, stats1)
-disc1_up = Discipline(talents1, stats1)
-stats2 = Stats(main=13000, crit=4000, haste=8000, mast=1560, vers=800)
-disc2 = Discipline(talents1, stats2)
 
-stats3 = Stats(main=13000, crit=4000, haste=11800, mast=1000, vers=800)
-disc3 = Discipline(talents_taikki1, stats3)
-disc3_up = Discipline(talents1, stats3)
-disc3_taikki = Discipline(talents_taikki1, stats3)
-disc1_taikki = Discipline(talents_taikki1, stats1)
-#tracker1 = forced_30s_ramp(disc1)
-#tracker3 = forced_30s_ramp(disc3)
-#tracker3_taikki = taikki_8650_no_buffs(disc3_taikki)
-#tracker1_taikki = taikki_8650_no_buffs(disc1_taikki)
-#tracker3 = eva_mini_rapture_mini(disc3, extra_casts=True)
-#tracker1 = eva_mini_rapture_mini(disc1)
-# tracker1 = start_new_ramp_when_sfiend_and_2_rads_ready(disc1)
-tracker3 = start_new_ramp_when_sfiend_and_2_rads_ready(disc3)
-#tracker1 = eva_up_rapture_2_rads_ready(disc1_up)
-#tracker3 = eva_up_rapture_2_rads_ready(disc3_up)
-#tracker3 = sfiend_2_rads(disc3)
-plot_throughputs([tracker1, tracker3], labels=['Norm haste, \n Eva - 1rad - rapture - 1rad', 'High haste, \nEva - Rapture - 2rad'])
+    # tot
+    "ToT": 1,
+    'DA': 1,
+    "BoL": 2,
+
+    # up
+    'HW': 0,
+    'OwL': 0,
+
+    # vs
+    "VS": 1,
+    "IT": 1,
+    "Bender": 0,
+
+    # eva
+    "Evangelism": 1,
+    "HD": 2,
+    "TE": 0
+}
+
+stats1 = Stats(main=13000, crit=5400, haste=5400, mast=1780, vers=1780)
+stats_taikki = Stats(main=13000, crit=4000, haste=8650, mast=1000, vers=800)
+
+
+disc1 = Discipline(talents_bender, stats1)
+disc2 = Discipline(talents_sfiend, stats1)
+
+tracker1 = eva_mini_rapture_mini(disc1)
+tracker2 = eva_mini_rapture_mini(disc2)
+
+
+plot_throughputs([tracker1, tracker2], labels=['Bender', 'Sfiend'])
 
 
 

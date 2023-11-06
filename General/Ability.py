@@ -18,6 +18,7 @@ class Ability:
         self._haste_effect = haste_effect
         self._max_charges = charges
         self._charges = charges
+        self._ready = True
         self.throughput_type = throughput_type
         self.name = name
         self.cast = self.base_cast
@@ -26,10 +27,11 @@ class Ability:
         return self.name
 
     def base_cast(self, cast_start_time: float):
-        if self.remaining_cooldown > 0 and self._charges == 0:
+        if not self.ready:
             raise ValueError(f'Ability {self.name} is still on cooldown')
         self._remaining_cooldown = self.cooldown + self.cast_time if self._charges == self._max_charges else self._remaining_cooldown
         self._charges -= 1
+        self._ready = self._charges > 0
         to_return = self.ability_event(cast_start_time)
         return to_return
 
@@ -57,14 +59,19 @@ class Ability:
     def cooldown(self):
         return self._base_cooldown / (1 + (self._haste_effect - 1) * int(self._cooldown_haste_scale))
 
+    @property
+    def ready(self):
+        return self._ready
+
     def progress_time(self, t: float):
-        if self.remaining_cooldown <= 0:
+        if self.ready and self._charges == self._max_charges:
             return
 
         self._remaining_cooldown -= t
-        if self._remaining_cooldown <= 0:
+        if self._remaining_cooldown <= 1/30:
             self._charges += 1
             self._remaining_cooldown = self.cooldown + self.remaining_cooldown if self._charges < self._max_charges else 0
+            self._ready = self._charges > 0
 
     def set_haste(self, haste_effect: float):
         self._haste_effect = haste_effect
