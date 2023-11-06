@@ -360,21 +360,51 @@ def start_new_ramp_when_sfiend_and_2_rads_ready(disc: Discipline):
     sfiend = disc.abilities["sfiend"]
     pwr = disc.abilities["pwr"]
     penance = disc.abilities["penance"]
+    scov = disc._buffs["SC"]
 
     disc.cast("ptw")
     disc.cast("ptw")
     evangelism_ramp(disc)
     disc.cast("sfiend")
+    if disc.gcd <= 1:
+        disc.cast("penance")
+
     disc.cast("mind_blast")
+    if disc.gcd <= 1:
+        disc.cast("swd")
+    else:
+        disc.cast("penance")
 
-    while (1 - pwr._charges)*15 + pwr.remaining_cooldown > 10 or sfiend.remaining_cooldown > 10:
-        if penance.remaining_cooldown > 0:
-            disc.cast("smite")
+    ramp_time = (7*disc.gcd + disc.radiance_cast)/1.08
+    radiance_cast = disc.radiance_cast/1.08
+    time_until_ramp_start = max((1 - pwr._charges)*15 + pwr.remaining_cooldown, sfiend.remaining_cooldown - radiance_cast)
+    while time_until_ramp_start > ramp_time:
+
+        print(ramp_time, pwr.remaining_cooldown, sfiend.remaining_cooldown, tracker.cast_abilities.iat[-1])
+        #
+        # swd_and_mb_ready = (disc.abilities["mind_blast"].remaining_cooldown <= 0 and disc.abilities["swd"].remaining_cooldown <= disc.gcd) or (disc.abilities["mind_blast"].remaining_cooldown <= disc.gcd and disc.abilities["swd"].remaining_cooldown <= 0)
+        # if disc.gcd <= 1 and swd_and_mb_ready:
+        #     ability_to_cast = "swd" if disc.abilities["swd"].remaining_cooldown <= 0 else "mind_blast"
+        #     other_ability_to_cast = "swd" if ability_to_cast == "mind_blast" else "mind_blast"
+        #     disc.cast(ability_to_cast)
+        #     disc.cast(other_ability_to_cast)
+        #     potds_up = True
+
+        if disc.abilities["mind_blast"].remaining_cooldown > 0 or not scov.buff_active:
+            if penance.remaining_cooldown > 0 or disc.active_atonements.n_atonements < 10:
+                disc.cast("smite")
+            else:
+                disc.cast("penance")
         else:
-            disc.cast("penance")
+            disc.cast("mind_blast")
 
+
+        time_until_ramp_start = max((1 - pwr._charges)*15 + pwr.remaining_cooldown, sfiend.remaining_cooldown - radiance_cast)
+
+    print(ramp_time, pwr.remaining_cooldown, sfiend.remaining_cooldown, (ramp_time - pwr.remaining_cooldown)/disc.gcd*1.08)
+
+    quit()
     disc.cast("ptw")
-    disc.cast("pws_rapture")
     disc.cast("pws_rapture")
     disc.cast("pws_rapture")
     disc.cast("pws_rapture")
@@ -383,6 +413,7 @@ def start_new_ramp_when_sfiend_and_2_rads_ready(disc: Discipline):
     disc.cast("flash_heal")
     disc.cast("pws_rapture")
     disc.cast("pwr")
+    print(disc.time)
     disc.cast("pwr")
     disc.cast("sfiend")
     disc.cast("mind_blast")
@@ -468,6 +499,30 @@ def eva_up_rapture_2_rads_ready(disc: Discipline):
     print(disc.abilities["up"].remaining_cooldown)
     return tracker
 
+def sfiend_2_rads(disc: Discipline):
+
+    tracker = ThroughputTracker(disc)
+
+    disc.cast("ptw")
+    evangelism_ramp(disc)
+    disc.cast("sfiend")
+    disc.cast("mind_blast")
+    disc.cast("swd")
+
+    penance_4_smites(disc)
+    penance_4_smites(disc)
+    penance_4_smites(disc)
+    penance_4_smites(disc)
+    disc.cast("smite")
+    disc.cast("smite")
+    #disc.cast("smite")
+
+    print(f'{disc.abilities["sfiend"].remaining_cooldown}')
+    print(f'{disc.abilities["pwr"].remaining_cooldown}')
+    quit()
+
+
+
 talents1 = {
     "Schism": 1,
     "PP": 1,
@@ -519,7 +574,7 @@ disc1_up = Discipline(talents1, stats1)
 stats2 = Stats(main=13000, crit=4000, haste=8000, mast=1560, vers=800)
 disc2 = Discipline(talents1, stats2)
 
-stats3 = Stats(main=13000, crit=4000, haste=8560, mast=1000, vers=800)
+stats3 = Stats(main=13000, crit=4000, haste=11800, mast=1000, vers=800)
 disc3 = Discipline(talents_taikki1, stats3)
 disc3_up = Discipline(talents1, stats3)
 disc3_taikki = Discipline(talents_taikki1, stats3)
@@ -529,11 +584,12 @@ disc1_taikki = Discipline(talents_taikki1, stats1)
 #tracker3_taikki = taikki_8650_no_buffs(disc3_taikki)
 #tracker1_taikki = taikki_8650_no_buffs(disc1_taikki)
 #tracker3 = eva_mini_rapture_mini(disc3, extra_casts=True)
-tracker1 = eva_mini_rapture_mini(disc1)
+#tracker1 = eva_mini_rapture_mini(disc1)
 # tracker1 = start_new_ramp_when_sfiend_and_2_rads_ready(disc1)
 tracker3 = start_new_ramp_when_sfiend_and_2_rads_ready(disc3)
 #tracker1 = eva_up_rapture_2_rads_ready(disc1_up)
 #tracker3 = eva_up_rapture_2_rads_ready(disc3_up)
+#tracker3 = sfiend_2_rads(disc3)
 plot_throughputs([tracker1, tracker3], labels=['Norm haste, \n Eva - 1rad - rapture - 1rad', 'High haste, \nEva - Rapture - 2rad'])
 
 

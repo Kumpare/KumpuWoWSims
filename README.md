@@ -21,4 +21,7 @@ Other improvements:
 
 Move the buff handling from Discipline class to BuffManager for the sake of anyone working on this.
 Move functionality from Disc to Specialization for modularity.
+Implement the Ability's cast function as a generator system, with member variables
+_effects_before and _effects_after so that different effects are applied at the correct times
+and removes the need of decorators for effects.
 
