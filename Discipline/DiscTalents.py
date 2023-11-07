@@ -296,6 +296,7 @@ class InescapableTorment(DiscTalentWrapper):
         self._scov_extension_amount = 1. - 0.3*int(self._bender_talented)
         self._pet_extension_amount = self._scov_extension_amount
         self._it = disc.abilities['IT']
+        self._it.dmg_sp_coef /= 1 + 0.5*int(self._pet_name == "bender")
 
         self._penance = disc.abilities['penance']
         self._mind_blast = disc.abilities['mind_blast']

@@ -445,15 +445,18 @@ def forced_30s_ramp(disc: Discipline):
 def start_new_ramp_when_sfiend_and_2_rads_ready(disc: Discipline):
 
     tracker = ThroughputTracker(disc)
-    sfiend = disc.abilities["sfiend"]
+    pet_name = 'bender' if disc.talents["Bender"] > 0 else 'sfiend'
+    pet = disc.abilities[pet_name]
     pwr = disc.abilities["pwr"]
     penance = disc.abilities["penance"]
     scov = disc._buffs["SC"]
+    potds = disc.abilities["PotDS"]
+    mind_blast = disc.abilities["mind_blast"]
 
     disc.cast("ptw")
     disc.cast("ptw")
     evangelism_ramp(disc)
-    disc.cast("sfiend")
+    disc.cast(pet_name)
     if disc.gcd <= 1:
         disc.cast("penance")
 
@@ -463,35 +466,18 @@ def start_new_ramp_when_sfiend_and_2_rads_ready(disc: Discipline):
     else:
         disc.cast("penance")
 
-    ramp_time = (7*disc.gcd + disc.radiance_cast)/1.08
-    radiance_cast = disc.radiance_cast/1.08
-    time_until_ramp_start = max((1 - pwr._charges)*15 + pwr.remaining_cooldown, sfiend.remaining_cooldown - radiance_cast)
+    ramp_time = (7*disc.gcd + disc.radiance_cast)/(1 + 0.04*disc.talents["BT"])
+    radiance_cast = disc.radiance_cast/(1 + 0.04*disc.talents["BT"])
+    time_until_ramp_start = max((1 - pwr._charges)*15 + pwr.remaining_cooldown, pet.remaining_cooldown - radiance_cast)
     while time_until_ramp_start > ramp_time:
 
-        print(ramp_time, pwr.remaining_cooldown, sfiend.remaining_cooldown, tracker.cast_abilities.iat[-1])
-        #
-        # swd_and_mb_ready = (disc.abilities["mind_blast"].remaining_cooldown <= 0 and disc.abilities["swd"].remaining_cooldown <= disc.gcd) or (disc.abilities["mind_blast"].remaining_cooldown <= disc.gcd and disc.abilities["swd"].remaining_cooldown <= 0)
-        # if disc.gcd <= 1 and swd_and_mb_ready:
-        #     ability_to_cast = "swd" if disc.abilities["swd"].remaining_cooldown <= 0 else "mind_blast"
-        #     other_ability_to_cast = "swd" if ability_to_cast == "mind_blast" else "mind_blast"
-        #     disc.cast(ability_to_cast)
-        #     disc.cast(other_ability_to_cast)
-        #     potds_up = True
-
-        if disc.abilities["mind_blast"].remaining_cooldown > 0 or not scov.buff_active:
-            if penance.remaining_cooldown > 0 or disc.active_atonements.n_atonements < 10:
-                disc.cast("smite")
-            else:
-                disc.cast("penance")
-        else:
+        if mind_blast.ready and pwr.remaining_cooldown > mind_blast.cooldown:
             disc.cast("mind_blast")
+        else:
+            disc.cast("smite")
 
+        time_until_ramp_start = max((1 - pwr._charges)*15 + pwr.remaining_cooldown, pet.remaining_cooldown - radiance_cast)
 
-        time_until_ramp_start = max((1 - pwr._charges)*15 + pwr.remaining_cooldown, sfiend.remaining_cooldown - radiance_cast)
-
-    print(ramp_time, pwr.remaining_cooldown, sfiend.remaining_cooldown, (ramp_time - pwr.remaining_cooldown)/disc.gcd*1.08)
-
-    quit()
     disc.cast("ptw")
     disc.cast("pws_rapture")
     disc.cast("pws_rapture")
@@ -501,16 +487,15 @@ def start_new_ramp_when_sfiend_and_2_rads_ready(disc: Discipline):
     disc.cast("flash_heal")
     disc.cast("pws_rapture")
     disc.cast("pwr")
-    print(disc.time)
     disc.cast("pwr")
-    disc.cast("sfiend")
+    disc.cast(pet_name)
     disc.cast("mind_blast")
 
-    while (1 - pwr._charges)*15 + pwr.remaining_cooldown > 10 or sfiend.remaining_cooldown > 10:
-        if penance.remaining_cooldown > 0.1:
-            disc.cast("smite")
-        else:
+    while (1 - pwr._charges)*15 + pwr.remaining_cooldown > 10 or pet.remaining_cooldown > 10:
+        if penance.ready:
             disc.cast("penance")
+        else:
+            disc.cast("smite")
 
     return tracker
 
@@ -679,16 +664,16 @@ talents_sfiend = {
 
 stats1 = Stats(main=13000, crit=5400, haste=5400, mast=1780, vers=1780)
 stats_taikki = Stats(main=13000, crit=4000, haste=8650, mast=1000, vers=800)
-
+stats2 = Stats(main=13000, crit=5400, haste=5400, mast=1780, vers=1780)
 
 disc1 = Discipline(talents_bender, stats1)
-disc2 = Discipline(talents_sfiend, stats1)
+disc2 = Discipline(talents_sfiend, stats_taikki)
 
-tracker1 = eva_mini_rapture_mini(disc1)
-tracker2 = eva_mini_rapture_mini(disc2)
+tracker1 = start_new_ramp_when_sfiend_and_2_rads_ready(disc1)
+tracker2 = start_new_ramp_when_sfiend_and_2_rads_ready(disc2)
 
 
-plot_throughputs([tracker1, tracker2], labels=['Bender', 'Sfiend'])
-
+plot_throughputs([tracker1, tracker2], labels=['Bender - low haste', 'Sfiend - high haste'])
+print("test")
 
 
